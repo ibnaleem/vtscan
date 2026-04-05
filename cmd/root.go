@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"os"
 	
 	"github.com/spf13/cobra"
 	"github.com/ibnaleem/vtscan/internal/util"
@@ -17,4 +18,8 @@ func Execute() {
 
 	util.CheckError(err)	
 
+}
+
+func GetAPIKey() string {
+	return os.Getenv("VT_API_KEY")
 }
