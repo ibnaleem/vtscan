@@ -1,4 +1,4 @@
-# 🔍 VTScan — Virus Total for the Terminal
+# 🛡️ VTScan — VirusTotal for the Terminal
 
 <p align="center">
     <picture>
