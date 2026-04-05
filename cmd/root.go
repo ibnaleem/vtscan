@@ -20,6 +20,11 @@ func Execute() {
 
 }
 
+func init() {
+    rootCmd.SilenceErrors = true
+		rootCmd.SilenceUsage = true
+}
+
 func GetAPIKey() string {
 	return os.Getenv("VT_API_KEY")
 }
