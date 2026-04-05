@@ -9,11 +9,11 @@ import (
 
 var ipCmd = &cobra.Command{
 	Use: "ip <address>",
-	Short: "Get an IP address report",
+	Short: "Get an IP address report (returns JSON)",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		if len(args) == 0 {
-			return fmt.Errorf("vtscan: missing IP address argument in command ip.\nUsage: vtscan ip <ip address>\nFor multiple IP addresses, do: vtscan ip <ip address 1> <ip address 2>")
+			return fmt.Errorf("\nvtscan: missing IP address argument in command ip.\n\nUsage:\n  vtscan ip <ip address>\n\nFor multiple IP addresses:\n  vtscan ip <ip address 1> <ip address 2> <ip address 3> etc.")
 		}
 
 		apiKey := GetAPIKey()
