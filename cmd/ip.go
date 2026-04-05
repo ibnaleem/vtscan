@@ -26,7 +26,7 @@ var ipCmd = &cobra.Command{
 		
 		for _, ip := range args {
 			
-			body, err := client.Get(fmt.Sprintf("ip_addresses/%s", ip))
+		  body, err := client.Get(fmt.Sprintf("ip_addresses/%s", ip))
 			
 			if err != nil {
 					return err
