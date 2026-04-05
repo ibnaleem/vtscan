@@ -1,11 +1,9 @@
 package cmd
 
 import (
-
-	"os"
-	"fmt"
 	
 	"github.com/spf13/cobra"
+	"github.com/ibnaleem/vtscan/internal/util"
 )
 
 var rootCmd = &cobra.Command{
@@ -13,17 +11,10 @@ var rootCmd = &cobra.Command{
 	Short: "Scan files, hashes, URLs, domains, and IPs against VirusTotal",
 }
 
-func CheckError(err error) {
-	if (err != nil) {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
-}
-
 func Execute() {
 
 	err := rootCmd.Execute()
 
-	CheckError(err)	
+	util.CheckError(err)	
 
 }
