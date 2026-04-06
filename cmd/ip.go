@@ -26,10 +26,15 @@ var ipCmd = &cobra.Command{
 		
 		for _, ip := range args {
 			
-		  body, err := client.Get(fmt.Sprintf("ip_addresses/%s", ip))
+		  body, statusCode, err := client.Get(fmt.Sprintf("ip_addresses/%s", ip))
 			
 			if err != nil {
 					return err
+			}
+
+			if statusCode != 200 {
+				fmt.Printf("vtscan: nothing found for %s\n", ip)
+				return nil
 			}
 
 			fmt.Println(string(body))
