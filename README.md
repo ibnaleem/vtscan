@@ -13,6 +13,7 @@
 </p>
 
 <p align="center">
+  <img src="https://github.com/ibnaleem/vtscan/actions/workflows/go.yml/badge.svg?event=push" alt="GitHub Actions Badge">
   <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/ibnaleem/vtscan">
   <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/w/ibnaleem/vtscan">
   <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/ibnaleem/vtscan">
