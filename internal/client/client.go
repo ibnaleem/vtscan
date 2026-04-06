@@ -21,7 +21,7 @@ func NewClient(apikey string) *Client {
 	}
 }
 
-func (c *Client) Get(endpoint string) ([]byte, error) {
+func (c *Client) Get(endpoint string) ([]byte, int error) {
 
 	client := &http.Client{
 		Timeout: 60 * time.Second,
@@ -32,7 +32,7 @@ func (c *Client) Get(endpoint string) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	
 	if err != nil {
-		return nil, err
+		return nil, 400, err
 	}	
 
 	req.Header.Set("User-Agent", DefaultUserAgent)
@@ -41,7 +41,7 @@ func (c *Client) Get(endpoint string) ([]byte, error) {
 	res, err := client.Do(req)
 
 	if err != nil {
-		return nil, err
+		return nil, res.StatusCode, err
 	}	
 
 	defer res.Body.Close()
@@ -52,6 +52,6 @@ func (c *Client) Get(endpoint string) ([]byte, error) {
 		return nil, err
 	}	
 
-	return body, nil
+	return body, res.StatusCode, nil
 
 }
