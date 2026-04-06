@@ -2,8 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"time"
+	"encoding/json"
   "github.com/spf13/cobra"
 	"github.com/ibnaleem/vtscan/internal/client"
+	"github.com/ibnaleem/vtscan/internal/util"
 )
 
 
@@ -36,6 +39,19 @@ var ipCmd = &cobra.Command{
 				fmt.Printf("vtscan: nothing found for %s\n", ip)
 				return nil
 			}
+
+			var ipResponse util.IPResponse
+
+			err = json.Unmarshal(body, &ipResponse)
+
+			if err != nil {
+				fmt.Println("vtscan: error unmarshalling response in cmd/ip.go")
+				return err
+			}
+
+			lastAnalysisDate := time.Unix(ipResponse.Data.Attributes.LastAnalysisDate, 0).Format("2006-01-02 15:04:05")
+			whoisDate := time.Unix(ipResponse.Data.Attributes.WhoisDate, 0).Format("2006-01-02 15:04:05")
+			lastModificationDate :=  time.Unix(ipResponse.Data.Attributes.LastModificationDate, 0).Format("2006-01-02 15:04:05")
 
 			fmt.Println(string(body))
 
