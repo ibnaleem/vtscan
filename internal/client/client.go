@@ -21,7 +21,7 @@ func NewClient(apikey string) *Client {
 	}
 }
 
-func (c *Client) Get(endpoint string) ([]byte, int error) {
+func (c *Client) Get(endpoint string) ([]byte, int, error) {
 
 	client := &http.Client{
 		Timeout: 60 * time.Second,
@@ -49,7 +49,7 @@ func (c *Client) Get(endpoint string) ([]byte, int error) {
 	body, err := io.ReadAll(res.Body)
 
 	if err != nil {
-		return nil, err
+		return nil, res.StatusCode, err
 	}	
 
 	return body, res.StatusCode, nil
