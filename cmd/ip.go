@@ -16,7 +16,7 @@ import (
 
 var ipCmd = &cobra.Command{
 	Use: "ip <address>",
-	Short: "Get an IP address report (returns JSON)",
+	Short: "Get an IP address report",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		if len(args) == 0 {
