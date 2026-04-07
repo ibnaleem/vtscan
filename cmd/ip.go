@@ -1,16 +1,16 @@
 package cmd
 
 import (
-	"os"
-	"fmt"
-	"time"
-	"strings"
 	"encoding/json"
+	"fmt"
+	"os"
+	"strings"
+	"time"
 
-  "github.com/spf13/cobra"
 	"github.com/ibnaleem/vtscan/internal/client"
 	"github.com/ibnaleem/vtscan/internal/util"
 	"github.com/olekukonko/tablewriter"
+	"github.com/spf13/cobra"
 )
 
 
@@ -63,8 +63,13 @@ var ipCmd = &cobra.Command{
 			fmt.Printf("IP: %s\n", ip)
 			fmt.Printf("Last Modification Date: %s\n", lastModificationDate)
 			fmt.Printf("Reputation: %d\n", ipResponse.Data.Attributes.Reputation)
-			fmt.Printf("Tags: %s\n", strings.Join(ipResponse.Data.Attributes.Tags, ", "))
 
+			if len(ipResponse.Data.Attributes.Tags) == 0 {
+				fmt.Println("Tags: None")
+			} else {
+
+				fmt.Printf("Tags: %s\n", strings.Join(ipResponse.Data.Attributes.Tags, ", "))
+			}
 			fmt.Println()
 
 			fmt.Printf("Last Analysis: %s\n", lastAnalysisDate)
