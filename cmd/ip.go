@@ -1,12 +1,16 @@
 package cmd
 
 import (
+	"os"
 	"fmt"
 	"time"
+	"strings"
 	"encoding/json"
+
   "github.com/spf13/cobra"
 	"github.com/ibnaleem/vtscan/internal/client"
 	"github.com/ibnaleem/vtscan/internal/util"
+	"github.com/olekukonko/tablewriter"
 )
 
 
@@ -53,7 +57,64 @@ var ipCmd = &cobra.Command{
 			whoisDate := time.Unix(ipResponse.Data.Attributes.WhoisDate, 0).Format("2006-01-02 15:04:05")
 			lastModificationDate :=  time.Unix(ipResponse.Data.Attributes.LastModificationDate, 0).Format("2006-01-02 15:04:05")
 
-			fmt.Println(string(body))
+			fmt.Println(strings.Repeat("=", 85))
+			fmt.Println()
+
+			fmt.Printf("IP: %s\n", ip)
+			fmt.Printf("Last Modification Date: %s\n", lastModificationDate)
+			fmt.Printf("Reputation: %d\n", ipResponse.Data.Attributes.Reputation)
+			fmt.Printf("Tags: %s\n", strings.Join(ipResponse.Data.Attributes.Tags, ", "))
+
+			fmt.Println()
+
+			fmt.Printf("Last Analysis: %s\n", lastAnalysisDate)
+			fmt.Printf("  Malicious:  " + util.DarkTheme.Red + "%d\n" + util.DarkTheme.Reset, ipResponse.Data.Attributes.LastAnalysisStats.Malicious)
+			fmt.Printf("  Suspicious: " + util.DarkTheme.Yellow + "%d\n" + util.DarkTheme.Reset, ipResponse.Data.Attributes.LastAnalysisStats.Suspicious)
+			fmt.Printf("  Harmless:   " + util.DarkTheme.Green + "%d\n" + util.DarkTheme.Reset, ipResponse.Data.Attributes.LastAnalysisStats.Harmless)
+			fmt.Printf("  Undetected: " + util.DarkTheme.Gray + "%d\n" + util.DarkTheme.Reset, ipResponse.Data.Attributes.LastAnalysisStats.Undetected)
+			fmt.Printf("  Timeout:    " + util.DarkTheme.Red + "%d\n" + util.DarkTheme.Reset, ipResponse.Data.Attributes.LastAnalysisStats.Timeout)
+
+			fmt.Println()
+
+			fmt.Println("Community Votes:")
+			fmt.Printf("  Harmless:  " +  util.DarkTheme.Green + "%d\n" + util.DarkTheme.Reset, ipResponse.Data.Attributes.TotalVotes.Harmless)
+			fmt.Printf("  Malicious: " + util.DarkTheme.Red + "%d\n" + util.DarkTheme.Reset, ipResponse.Data.Attributes.TotalVotes.Malicious)
+
+			fmt.Println()
+
+			fmt.Printf("WHOIS Date: %d\n", whoisDate)
+			fmt.Printf("WHOIS Output: %s\n", ipResponse.Data.Attributes.Whois)
+
+			fmt.Println()
+
+			fmt.Println("Engine Results:")
+
+			table := tablewriter.NewWriter(os.Stdout)
+
+			table.Header([]string{"Engine", "Method", "Category", "Result"})
+
+			var colourCodedCategory string
+			var colourCodedResult string
+
+			for _, entry := range ipResponse.Data.Attributes.LastAnalysisResults {
+				if entry.Result == "clean" {
+					colourCodedCategory = util.DarkTheme.Green + entry.Category + util.DarkTheme.Reset
+					colourCodedResult   = util.DarkTheme.Green + entry.Result + util.DarkTheme.Reset
+				} else if entry.Result == "malicious" {
+					colourCodedCategory = util.DarkTheme.Red + entry.Category + util.DarkTheme.Reset
+					colourCodedResult   = util.DarkTheme.Red + entry.Result + util.DarkTheme.Reset
+				} else if entry.Result == "unrated" {
+					colourCodedCategory = util.DarkTheme.Gray + entry.Category + util.DarkTheme.Reset
+					colourCodedResult   = util.DarkTheme.Gray + entry.Result + util.DarkTheme.Reset
+				} else {
+					colourCodedCategory = entry.Category
+					colourCodedResult = entry.Result
+				}
+				
+				table.Append([]string{entry.EngineName, entry.Method, colourCodedCategory, colourCodedResult})
+
+				table.Render()
+			}
 
 		}
 
