@@ -49,7 +49,7 @@ var ipCmd = &cobra.Command{
 			err = json.Unmarshal(body, &ipResponse)
 
 			if err != nil {
-				fmt.Println("vtscan: error unmarshalling JSON for %s in cmd/ip.go\nPlease raise an issue @ github.com/ibnaleem/issues\n", ip)
+				fmt.Printf("vtscan: error unmarshalling JSON for %s in cmd/ip.go\nPlease raise an issue @ github.com/ibnaleem/issues\n", ip)
 				return err
 			}
 
