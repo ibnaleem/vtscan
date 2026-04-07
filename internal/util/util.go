@@ -114,9 +114,9 @@ func PrintFileResponse(fileResponse FileResponse) {
 	fmt.Println()
 
 	fmt.Printf("Type: %s (%s)\n", fileResponse.Data.Attributes.TypeDescription, fileResponse.Data.Attributes.TypeExtension)
-	fmt.Printf("Size: %s bytes\n", fileResponse.Data.Attributes.Size)
+	fmt.Printf("Size: %d bytes\n", fileResponse.Data.Attributes.Size)
 	fmt.Printf("Magic: %s\n", fileResponse.Data.Attributes.Magic)
-	fmt.Printf("Reputation: %s\n", fileResponse.Data.Attributes.Reputation)
+	fmt.Printf("Reputation: %d\n", fileResponse.Data.Attributes.Reputation)
 
 	if len(fileResponse.Data.Attributes.Tags) == 0 {
 		fmt.Println("Tags: None")
