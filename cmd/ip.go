@@ -85,7 +85,6 @@ var ipCmd = &cobra.Command{
 			fmt.Printf("WHOIS Date: %s\n", whoisDate)
 			fmt.Printf("%s\n", ipResponse.Data.Attributes.Whois)
 
-			fmt.Println()
 
 			table := tablewriter.NewWriter(os.Stdout)
 
