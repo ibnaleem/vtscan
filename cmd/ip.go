@@ -87,8 +87,6 @@ var ipCmd = &cobra.Command{
 
 			fmt.Println()
 
-			fmt.Println("Engine Results:")
-
 			table := tablewriter.NewWriter(os.Stdout)
 
 			table.Header([]string{"Engine", "Method", "Category", "Result"})
@@ -116,6 +114,8 @@ var ipCmd = &cobra.Command{
 			}
 
 			table.Render()
+
+			fmt.Println()
 		}
 
 			return nil
