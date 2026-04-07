@@ -1,11 +1,15 @@
-package util
+package util 
 
 import (
 	"os"
 	"io"
 	"fmt"
+	"time"
 	"regexp"
+	"strconv"
+	"strings"
 	"crypto/sha256"
+  "github.com/olekukonko/tablewriter"
 )
 
 type Theme struct {
@@ -88,5 +92,231 @@ func CalculateFileSHA256Hash(path string) (string, error) {
 	hash := sha256Hasher.Sum(nil)
 
 	return fmt.Sprintf("%x", hash), nil
+
+}
+
+func PrintFileResponse(fileResponse FileResponse) {
+	lastAnalysisDate := time.Unix(fileResponse.Data.Attributes.LastAnalysisDate, 0).Format("2006-01-02 15:04:05")
+	firstSubmissionDate := time.Unix(fileResponse.Data.Attributes.FirstSubmissionDate, 0).Format("2006-01-02 15:04:05")
+	lastModificationDate := time.Unix(fileResponse.Data.Attributes.LastModificationDate, 0).Format("2006-01-02 15:04:05")
+	lastSubmissionDate := time.Unix(fileResponse.Data.Attributes.LastSubmissionDate, 0).Format("2006-01-02 15:04:05")	
+	
+	
+	fmt.Println(strings.Repeat("=", 85))
+	fmt.Println()
+
+	fmt.Printf("File: %s\n", strings.Join(fileResponse.Data.Attributes.Names, ", "))
+	fmt.Printf("SHA256: 			 %s\n", fileResponse.Data.Attributes.SHA256)
+	fmt.Printf("SHA1:   			 %s\n", fileResponse.Data.Attributes.SHA1)
+	fmt.Printf("MD5:           %s\n", fileResponse.Data.Attributes.MD5)
+	fmt.Printf("Last Modified: %s\n", lastModificationDate)
+
+	fmt.Println()
+
+	fmt.Printf("Type: %s (%s)\n", fileResponse.Data.Attributes.TypeDescription, fileResponse.Data.Attributes.TypeExtension)
+	fmt.Printf("Size: %s bytes\n", fileResponse.Data.Attributes.Size)
+	fmt.Printf("Magic: %s\n", fileResponse.Data.Attributes.Magic)
+	fmt.Printf("Reputation: %s\n", fileResponse.Data.Attributes.Reputation)
+
+	if len(fileResponse.Data.Attributes.Tags) == 0 {
+		fmt.Println("Tags: None")
+	} else {
+		fmt.Printf("Tags: %s\n", strings.Join(fileResponse.Data.Attributes.Tags, ", "))
+	}
+
+	if len(fileResponse.Data.Attributes.TypeTags) == 0 {
+		fmt.Println("Type Tags: None")
+	} else {
+		fmt.Printf("Type Tags: %s\n", strings.Join(fileResponse.Data.Attributes.TypeTags, ", "))
+	}
+	
+	fmt.Println()
+
+	fmt.Println("Submission:")
+	fmt.Printf("  First: %s\n", firstSubmissionDate)
+	fmt.Printf("  Last:  %s\n", lastSubmissionDate)
+	fmt.Printf("  Times: %d\n", fileResponse.Data.Attributes.TimesSubmitted)
+
+	fmt.Println()
+
+	fmt.Printf("Last Analysis: %s\n", lastAnalysisDate)
+	fmt.Printf("  Malicious:        " + DarkTheme.Red + "%s\n" + DarkTheme.Reset, fileResponse.Data.Attributes.LastAnalysisStats.Malicious)
+	fmt.Printf("  Suspicious:       " + DarkTheme.Red + "%s\n" + DarkTheme.Reset, fileResponse.Data.Attributes.LastAnalysisStats.Suspicious)
+	fmt.Printf("  Undetected:       " + DarkTheme.Blue + "%s\n" + DarkTheme.Reset, fileResponse.Data.Attributes.LastAnalysisStats.Undetected)
+	fmt.Printf("  Harmless:         " + DarkTheme.Green + "%s\n" + DarkTheme.Reset, fileResponse.Data.Attributes.LastAnalysisStats.Harmless)
+	fmt.Printf("  Timeout:          " + DarkTheme.Red + "%s\n" + DarkTheme.Reset, fileResponse.Data.Attributes.LastAnalysisStats.Timeout)
+	fmt.Printf("  Type Unsupported: %d\n", fileResponse.Data.Attributes.LastAnalysisStats.TypeUnsupported)
+
+	fmt.Println()
+
+	fmt.Println("Community Votes:")
+	fmt.Printf("  Harmless:  " + DarkTheme.Green + "%s\n" + DarkTheme.Reset, fileResponse.Data.Attributes.TotalVotes.Harmless)
+	fmt.Printf("  Malicious: " + DarkTheme.Red + "%s\n" + DarkTheme.Reset, fileResponse.Data.Attributes.TotalVotes.Malicious)
+
+	fmt.Println()
+
+	for _, ai := range fileResponse.Data.Attributes.CrowdsourcedAI {
+
+		fmt.Println(strings.Repeat("⎯", 85))
+
+		fmt.Printf("AI Analysis (source: %s)\n", ai.Source)
+		fmt.Printf("  Verdict: %s\n", ai.Verdict)
+		fmt.Printf("  Category: %s\n", ai.Category)
+		fmt.Printf("  %s\n", ai.Analysis)
+
+		fmt.Println()
+	}
+
+	fmt.Println()
+
+	table := tablewriter.NewWriter(os.Stdout)
+
+	table.Header([]string{"Engine", "Engine Version", "Engine Update", "Method", "Category", "Result"})
+
+	var colourCodedCategory string
+	var colourCodedResult string
+
+	for _, entry := range fileResponse.Data.Attributes.LastAnalysisResults {
+		if entry.Result == "clean" {
+					colourCodedCategory =  DarkTheme.Green + entry.Category +  DarkTheme.Reset
+					colourCodedResult   =  DarkTheme.Green + entry.Result +  DarkTheme.Reset
+				} else if entry.Result == "malicious" {
+					colourCodedCategory =  DarkTheme.Red + entry.Category +  DarkTheme.Reset
+					colourCodedResult   =  DarkTheme.Red + entry.Result +  DarkTheme.Reset
+				} else {
+					colourCodedCategory = entry.Category
+					colourCodedResult = entry.Result
+				}
+
+				table.Append([]string{entry.EngineName, entry.EngineVersion, entry.EngineUpdate, entry.Method, colourCodedCategory, colourCodedResult})
+	}
+
+	table.Render()
+
+	fmt.Println()
+	fmt.Println()
+
+	fmt.Println("Sandbox Verdicts:")
+
+	table = tablewriter.NewWriter(os.Stdout)
+
+
+	table.Header([]string{"Sandbox", "Category", "Malware Classifications", "Confidence"})
+
+	for _, sandbox := range fileResponse.Data.Attributes.SandboxVerdicts {
+		if sandbox.Category == "harmless" {
+					colourCodedCategory =  DarkTheme.Green + sandbox.Category +  DarkTheme.Reset
+				} else if sandbox.Category == "malicious" {
+					colourCodedCategory =  DarkTheme.Red + sandbox.Category +  DarkTheme.Reset
+				} else {
+					colourCodedCategory = sandbox.Category
+				}
+		
+		stringConfidence := strconv.Itoa(sandbox.Confidence)
+		table.Append([]string{sandbox.SandboxName, colourCodedCategory, strings.Join(sandbox.MalwareClassification, ", "), stringConfidence})
+	}
+
+	fmt.Println()
+
+
+	fmt.Println("PE Information:")
+	fmt.Printf("  Entry Point:  %d\n", fileResponse.Data.Attributes.PEInfo.EntryPoint)
+	fmt.Printf("  Machine Type: %d\n", fileResponse.Data.Attributes.PEInfo.MachineType)
+	fmt.Printf("  Imphash:      %s\n", fileResponse.Data.Attributes.PEInfo.ImpHash)
+	fmt.Printf("  Timestamp:    %d\n", fileResponse.Data.Attributes.PEInfo.Timestamp)
+	
+	fmt.Println()
+	fmt.Println("Resource Langs:")
+
+	for key, value := range fileResponse.Data.Attributes.PEInfo.ResourceLangs {
+
+		fmt.Printf("  %s: %d\n", key, value)
+
+	}
+
+	fmt.Println()
+	fmt.Println("Resource Types:")
+
+	for key, value := range fileResponse.Data.Attributes.PEInfo.ResourceTypes {
+		fmt.Printf("  %s: %d\n", key, value)
+	}
+
+
+	fmt.Println()
+	fmt.Println("Resource Details:")
+
+	table = tablewriter.NewWriter(os.Stdout)
+	table.Header([]string{"Lang", "Type", "File Type", "Chi2", "Entropy", "SHA256"})
+
+	for _, resource := range fileResponse.Data.Attributes.PEInfo.ResourceDetails {
+		stringChi2 := strconv.FormatFloat(resource.Chi2, 'f', -1, 64)
+		stringEntropy := strconv.FormatFloat(resource.Entropy, 'f', -1, 64)
+
+		table.Append([]string{resource.Lang, resource.Type, resource.FileType, stringChi2, stringEntropy, resource.SHA256})
+	}
+
+	table.Render()
+
+	fmt.Println()
+
+
+	fmt.Println("Sections:")
+
+	table = tablewriter.NewWriter(os.Stdout)
+	table.Header([]string{"Section Name", "Flags", "Chi2", "Raw Size", "Virtual Size", "Virtual Address", "Entropy", "MD5"})
+
+	for _, section := range fileResponse.Data.Attributes.PEInfo.Sections {
+
+		stringChi2           := strconv.FormatFloat(section.Chi2, 'f', -1, 64)
+		stringEntropy        := strconv.FormatFloat(section.Entropy, 'f', -1, 64)
+		stringRawSize        := strconv.Itoa(section.RawSize)
+		stringVirtualSize    := strconv.Itoa(section.VirtualSize)
+		stringVirtualAddress := strconv.Itoa(section.VirtualAddress)
+
+		table.Append([]string{section.Name, section.Flags, stringChi2, stringRawSize, stringVirtualSize, stringVirtualAddress, stringEntropy, section.MD5})
+	}
+
+	table.Render()
+
+	fmt.Println()
+
+	fmt.Println("Imported Libraries:")
+
+	table = tablewriter.NewTable(os.Stdout)
+	table.Header([]string{"Library Name", "Imported Functions"})
+
+	for _, importList := range fileResponse.Data.Attributes.PEInfo.Imports {
+		table.Append([]string{importList.LibraryName, strings.Join(importList.ImportedFunctions, ", ")})
+	}
+
+	table.Render()
+
+	fmt.Println()
+
+	fmt.Println("TRID:")
+
+	table = tablewriter.NewTable(os.Stdout)
+
+	table.Header([]string{"File Type", "Probability"})
+
+	var colouredProbability string
+
+	for _, trid := range fileResponse.Data.Attributes.TRID {
+
+		stringProbability := strconv.FormatFloat(trid.Probability, 'f', -1, 64)
+
+		if trid.Probability < 33 {
+			colouredProbability = DarkTheme.Red + stringProbability + DarkTheme.Reset
+		} else if trid.Probability > 33 && trid.Probability < 66 {
+			colouredProbability = DarkTheme.Yellow + stringProbability + DarkTheme.Reset
+		} else {
+			colouredProbability = DarkTheme.Green + stringProbability + DarkTheme.Reset
+		}
+
+		table.Append([]string{trid.FileType, colouredProbability})
+		
+	}
+
+	fmt.Println()
 
 }
