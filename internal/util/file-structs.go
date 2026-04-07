@@ -39,6 +39,47 @@ type AIResult struct {
 	Category string `json:"category"`
 }
 
+type ResourceDetail struct {
+	Lang    string  `json:"lang"`
+	Chi2    float64 `json:"chi2"`
+	FileType string `json:"filetype"`
+	Entropy float64 `json:"entropy"`
+	SHA256  string  `json:"sha256"`
+	Type    string  `json:"type"`
+}
+
+type Section struct {
+	Name           string  `json:"name"`
+	Chi2           float64 `json:"chi2"`
+	VirtualAddress int     `json:"virtual_address"`
+	Flags          string  `json:"flags"`
+	RawSize        int     `json:"raw_size"`
+	Entropy        float64 `json:"entropy"`
+	VirtualSize    int     `json:"virtual_size"`
+	MD5            string  `json:"md5"`
+}
+
+type ImportList struct {
+	LibraryName       string   `json:"library_name"`
+	ImportedFunctions []string `json:"imported_functions"`
+}
+
+type ResourceLang struct {
+	
+}
+
+type PEInfo struct {
+	Timestamp       int64                      `json:"timestamp"`
+	ImpHash         string                     `json:"imphash"`
+	MachineType     int                        `json:"machine_type"`
+	EntryPoint      int                        `json:"entry_point"`
+	ResourceDetails []ResourceDetail           `json:"resource_details"`
+	ResourceLangs   map[string]int             `json:"resource_langs"`
+	ResourceTypes   map[string]int             `json:"resource_types"`
+	Sections        []Section                  `json:"sections"`
+	Imports         []ImportList               `json:"import_list"`
+}
+
 type FileAttributes struct {
 	Magic                string                        `json:"magic"`
 	Reputation           int                           `json:"reputation"`
@@ -64,6 +105,7 @@ type FileAttributes struct {
 	TRID                 []TRIDEntry                   `json:"trid"`
 	CrowdsourcedAI       []AIResult                    `json:"crowdsourced_ai_results"`
 	SSDEEP               string                        `json:"ssdeep"`
+	PEInfo               PEInfo                        `json:"pe_info"`
 }
 
 type FileResponse struct {
