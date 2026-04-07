@@ -49,8 +49,8 @@ var ipCmd = &cobra.Command{
 			err = json.Unmarshal(body, &ipResponse)
 
 			if err != nil {
-				fmt.Printf("vtscan: error unmarshalling JSON for %s in cmd/ip.go\nPlease raise an issue @ github.com/ibnaleem/issues\n", ip)
-				return err
+				fmt.Fprintf(os.Stderr, "vtscan: error unmarshalling JSON for %s: %v\nPlease copy the error message above and raise an issue @ github.com/ibnaleem/vtscan/issues\n", ip, err)
+				return nil
 			}
 
 			lastAnalysisDate := time.Unix(ipResponse.Data.Attributes.LastAnalysisDate, 0).Format("2006-01-02 15:04:05")
