@@ -47,7 +47,7 @@ $ vtscan domain <domain 1> <domain 2> <domain 3>...
 ```
 
 ## 🗺️ Roadmap
-These are the following API endpoints that are planned implementation
+These are the following API endpoints that are planned for implementation
 ### IP Addresses
 1. [Request an IP address (re)scan](https://docs.virustotal.com/reference/rescan-ip) `POST`
 2. [Get comments on an IP address](https://docs.virustotal.com/reference/ip-comments-get) `GET`
