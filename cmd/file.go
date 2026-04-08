@@ -1,11 +1,12 @@
 package cmd
 
 import (
-	"os"
+	"encoding/json"
 	"fmt"
-  "github.com/spf13/cobra"
+	"os"
 	"github.com/ibnaleem/vtscan/internal/client"
 	"github.com/ibnaleem/vtscan/internal/util"
+	"github.com/spf13/cobra"
 )
 
 var fileCmd = &cobra.Command{
@@ -28,15 +29,30 @@ var fileCmd = &cobra.Command{
 
 		for _, arg := range args {
 			if util.CheckHash(arg) {
-				body, err := client.Get(fmt.Sprintf("files/%s", arg))
+				body, statusCode, err := client.Get(fmt.Sprintf("files/%s", arg))
 
 				if err != nil {
 					return err
 				}
 
-				fmt.Println(string(body))
+				if statusCode != 200 {
+					fmt.Printf("vtscan: nothing found for %s\n", arg)
+					return nil
+				} 
 
-				return nil
+				var fileResponse util.FileResponse
+
+				err = json.Unmarshal(body, &fileResponse)
+
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "vtscan (cmd/file.go): error unmarshalling JSON for %s: %v\nPlease copy the error message above and raise an issue @ github.com/ibnaleem/vtscan/issues\n", arg, err)
+					return nil
+				}
+
+				util.PrintFileResponse(fileResponse)
+
+
+			return nil
 
 			} else {
 				_, err := os.Stat(arg)
@@ -51,13 +67,28 @@ var fileCmd = &cobra.Command{
 						return fmt.Errorf("vtscan: could not hash %s: %v", arg, err)
 					}
 
-					body, err := client.Get(fmt.Sprintf("files/%s", hash))
+					body, statusCode, err := client.Get(fmt.Sprintf("files/%s", hash))
 
 					if err != nil {
 						return err
 					}
 
-					fmt.Println(string(body))
+					if statusCode != 200 {
+					fmt.Printf("vtscan: nothing found for %s\n", arg)
+					return nil
+				} 
+
+					var fileResponse util.FileResponse
+
+					err = json.Unmarshal(body, &fileResponse)
+
+					if err != nil {
+						fmt.Fprintf(os.Stderr, "vtscan (cmd/file.go): error unmarshalling JSON for %s: %v\nPlease copy the error message above and raise an issue @ github.com/ibnaleem/vtscan/issues\n", arg, err)
+						return nil
+					}
+
+					util.PrintFileResponse(fileResponse)
+
 
 					return nil
 
