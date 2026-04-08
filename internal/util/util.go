@@ -10,6 +10,7 @@ import (
 	"strings"
 	"crypto/sha256"
   "github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/tw"
 )
 
 type Theme struct {
@@ -106,9 +107,15 @@ func PrintFileResponse(fileResponse FileResponse) {
 	fmt.Println()
 
 	fmt.Printf("File: %s\n", strings.Join(fileResponse.Data.Attributes.Names, ", "))
-	fmt.Printf("SHA256: 			 %s\n", fileResponse.Data.Attributes.SHA256)
-	fmt.Printf("SHA1:   			 %s\n", fileResponse.Data.Attributes.SHA1)
-	fmt.Printf("MD5:           %s\n", fileResponse.Data.Attributes.MD5)
+
+	fmt.Println()
+
+	fmt.Printf("MD5    :  %s\n", fileResponse.Data.Attributes.MD5)
+	fmt.Printf("SHA1   :  %s\n", fileResponse.Data.Attributes.SHA1)
+	fmt.Printf("SHA256 :  %s\n", fileResponse.Data.Attributes.SHA256)
+
+	fmt.Println()
+
 	fmt.Printf("Last Modified: %s\n", lastModificationDate)
 
 	fmt.Println()
@@ -133,25 +140,25 @@ func PrintFileResponse(fileResponse FileResponse) {
 	fmt.Println()
 
 	fmt.Println("Submission:")
-	fmt.Printf("  First: %s\n", firstSubmissionDate)
-	fmt.Printf("  Last:  %s\n", lastSubmissionDate)
-	fmt.Printf("  Times: %d\n", fileResponse.Data.Attributes.TimesSubmitted)
+	fmt.Printf("  First : %s\n", firstSubmissionDate)
+	fmt.Printf("  Last  : %s\n", lastSubmissionDate)
+	fmt.Printf("  Times : %d\n", fileResponse.Data.Attributes.TimesSubmitted)
 
 	fmt.Println()
 
 	fmt.Printf("Last Analysis: %s\n", lastAnalysisDate)
-	fmt.Printf("  Malicious:        " + DarkTheme.Red + "%s\n" + DarkTheme.Reset, fileResponse.Data.Attributes.LastAnalysisStats.Malicious)
-	fmt.Printf("  Suspicious:       " + DarkTheme.Red + "%s\n" + DarkTheme.Reset, fileResponse.Data.Attributes.LastAnalysisStats.Suspicious)
-	fmt.Printf("  Undetected:       " + DarkTheme.Blue + "%s\n" + DarkTheme.Reset, fileResponse.Data.Attributes.LastAnalysisStats.Undetected)
-	fmt.Printf("  Harmless:         " + DarkTheme.Green + "%s\n" + DarkTheme.Reset, fileResponse.Data.Attributes.LastAnalysisStats.Harmless)
-	fmt.Printf("  Timeout:          " + DarkTheme.Red + "%s\n" + DarkTheme.Reset, fileResponse.Data.Attributes.LastAnalysisStats.Timeout)
+	fmt.Printf("  Malicious:        " + DarkTheme.Red + "%s\n" + DarkTheme.Reset, strconv.Itoa(fileResponse.Data.Attributes.LastAnalysisStats.Malicious))
+	fmt.Printf("  Suspicious:       " + DarkTheme.Red + "%s\n" + DarkTheme.Reset, strconv.Itoa(fileResponse.Data.Attributes.LastAnalysisStats.Suspicious))
+	fmt.Printf("  Undetected:       " + DarkTheme.Blue + "%s\n" + DarkTheme.Reset, strconv.Itoa(fileResponse.Data.Attributes.LastAnalysisStats.Undetected))
+	fmt.Printf("  Harmless:         " + DarkTheme.Green + "%s\n" + DarkTheme.Reset, strconv.Itoa(fileResponse.Data.Attributes.LastAnalysisStats.Harmless))
+	fmt.Printf("  Timeout:          " + DarkTheme.Red + "%s\n" + DarkTheme.Reset, strconv.Itoa(fileResponse.Data.Attributes.LastAnalysisStats.Timeout))
 	fmt.Printf("  Type Unsupported: %d\n", fileResponse.Data.Attributes.LastAnalysisStats.TypeUnsupported)
 
 	fmt.Println()
 
 	fmt.Println("Community Votes:")
-	fmt.Printf("  Harmless:  " + DarkTheme.Green + "%s\n" + DarkTheme.Reset, fileResponse.Data.Attributes.TotalVotes.Harmless)
-	fmt.Printf("  Malicious: " + DarkTheme.Red + "%s\n" + DarkTheme.Reset, fileResponse.Data.Attributes.TotalVotes.Malicious)
+	fmt.Printf("  Harmless  : " + DarkTheme.Green + "%d\n" + DarkTheme.Reset, fileResponse.Data.Attributes.TotalVotes.Harmless)
+	fmt.Printf("  Malicious : " + DarkTheme.Red + "%d\n" + DarkTheme.Reset, fileResponse.Data.Attributes.TotalVotes.Malicious)
 
 	fmt.Println()
 
@@ -162,6 +169,9 @@ func PrintFileResponse(fileResponse FileResponse) {
 		fmt.Printf("AI Analysis (source: %s)\n", ai.Source)
 		fmt.Printf("  Verdict: %s\n", ai.Verdict)
 		fmt.Printf("  Category: %s\n", ai.Category)
+
+		fmt.Println()
+
 		fmt.Printf("  %s\n", ai.Analysis)
 
 		fmt.Println()
@@ -177,10 +187,10 @@ func PrintFileResponse(fileResponse FileResponse) {
 	var colourCodedResult string
 
 	for _, entry := range fileResponse.Data.Attributes.LastAnalysisResults {
-		if entry.Result == "clean" {
+		if entry.Category == "clean" {
 					colourCodedCategory =  DarkTheme.Green + entry.Category +  DarkTheme.Reset
 					colourCodedResult   =  DarkTheme.Green + entry.Result +  DarkTheme.Reset
-				} else if entry.Result == "malicious" {
+				} else if entry.Category == "malicious" {
 					colourCodedCategory =  DarkTheme.Red + entry.Category +  DarkTheme.Reset
 					colourCodedResult   =  DarkTheme.Red + entry.Result +  DarkTheme.Reset
 				} else {
@@ -220,10 +230,10 @@ func PrintFileResponse(fileResponse FileResponse) {
 
 
 	fmt.Println("PE Information:")
-	fmt.Printf("  Entry Point:  %d\n", fileResponse.Data.Attributes.PEInfo.EntryPoint)
-	fmt.Printf("  Machine Type: %d\n", fileResponse.Data.Attributes.PEInfo.MachineType)
-	fmt.Printf("  Imphash:      %s\n", fileResponse.Data.Attributes.PEInfo.ImpHash)
-	fmt.Printf("  Timestamp:    %d\n", fileResponse.Data.Attributes.PEInfo.Timestamp)
+	fmt.Printf("  Entry Point  : %d\n", fileResponse.Data.Attributes.PEInfo.EntryPoint)
+	fmt.Printf("  Machine Type : %d\n", fileResponse.Data.Attributes.PEInfo.MachineType)
+	fmt.Printf("  Imphash      : %s\n", fileResponse.Data.Attributes.PEInfo.ImpHash)
+	fmt.Printf("  Timestamp    : %d\n", fileResponse.Data.Attributes.PEInfo.Timestamp)
 	
 	fmt.Println()
 	fmt.Println("Resource Langs:")
@@ -282,14 +292,20 @@ func PrintFileResponse(fileResponse FileResponse) {
 
 	fmt.Println("Imported Libraries:")
 
-	table = tablewriter.NewTable(os.Stdout)
-	table.Header([]string{"Library Name", "Imported Functions"})
 
 	for _, importList := range fileResponse.Data.Attributes.PEInfo.Imports {
-		table.Append([]string{importList.LibraryName, strings.Join(importList.ImportedFunctions, ", ")})
+		table = tablewriter.NewTable(os.Stdout)
+
+		table.Configure(func(cfg *tablewriter.Config) {
+    cfg.Header.Formatting.AutoFormat = tw.Off
+	})
+
+		table.Header([]string{importList.LibraryName})
+		table.Append([]string{strings.Join(importList.ImportedFunctions, "\n")})
+		table.Render()
+		fmt.Println()
 	}
 
-	table.Render()
 
 	fmt.Println()
 
