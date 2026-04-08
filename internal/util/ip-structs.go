@@ -15,10 +15,6 @@ type AnalysisStats struct {
 	Timeout    int `json:"timeout"`
 }
 
-type TotalVotes struct {
-	Harmless  int `json:"harmless"`
-	Malicious int `json:"malicious"`
-}
 
 type IPAttributes struct {
 	WhoisDate            int64                     `json:"whois_date"`
