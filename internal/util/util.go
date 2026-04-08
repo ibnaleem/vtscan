@@ -226,6 +226,8 @@ func PrintFileResponse(fileResponse FileResponse) {
 		table.Append([]string{sandbox.SandboxName, colourCodedCategory, strings.Join(sandbox.MalwareClassification, ", "), stringConfidence})
 	}
 
+	table.Render()
+
 	fmt.Println()
 
 
@@ -309,30 +311,35 @@ func PrintFileResponse(fileResponse FileResponse) {
 
 	fmt.Println()
 
-	fmt.Println("TRID:")
+	if len(fileResponse.Data.Attributes.TRID) != 0 {
 
-	table = tablewriter.NewTable(os.Stdout)
+		fmt.Println("TRID:")
+		
+		table = tablewriter.NewTable(os.Stdout)
 
-	table.Header([]string{"File Type", "Probability"})
+		table.Header([]string{"File Type", "Probability"})
 
-	var colouredProbability string
+		var colouredProbability string
 
-	for _, trid := range fileResponse.Data.Attributes.TRID {
+		for _, trid := range fileResponse.Data.Attributes.TRID {
 
-		stringProbability := strconv.FormatFloat(trid.Probability, 'f', -1, 64)
+			stringProbability := strconv.FormatFloat(trid.Probability, 'f', -1, 64)
 
-		if trid.Probability < 33 {
-			colouredProbability = DarkTheme.Red + stringProbability + DarkTheme.Reset
-		} else if trid.Probability > 33 && trid.Probability < 66 {
-			colouredProbability = DarkTheme.Yellow + stringProbability + DarkTheme.Reset
-		} else {
-			colouredProbability = DarkTheme.Green + stringProbability + DarkTheme.Reset
+			if trid.Probability < 33 {
+				colouredProbability = DarkTheme.Red + stringProbability + DarkTheme.Reset
+			} else if trid.Probability > 33 && trid.Probability < 66 {
+				colouredProbability = DarkTheme.Yellow + stringProbability + DarkTheme.Reset
+			} else {
+				colouredProbability = DarkTheme.Green + stringProbability + DarkTheme.Reset
+			}
+
+			table.Append([]string{trid.FileType, colouredProbability})
+			
 		}
 
-		table.Append([]string{trid.FileType, colouredProbability})
-		
-	}
+		table.Render()
 
+	}
 	fmt.Println()
 
 }
