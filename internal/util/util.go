@@ -343,3 +343,147 @@ func PrintFileResponse(fileResponse FileResponse) {
 	fmt.Println()
 
 }
+
+func PrintDomainResponse(domainResponse DomainResponse) {
+
+	var domainAttributes = domainResponse.Data.Attributes
+
+	creationDate := time.Unix(domainAttributes.CreationDate, 0).Format("2006-01-02 15:04:05")
+	lastModificationDate := time.Unix(domainAttributes.LastModificationDate, 0).Format("2006-01-02 15:04:05")
+	lastAnalysisDate := time.Unix(domainAttributes.LastAnalysisDate, 0).Format("2006-01-02 15:04:05")
+	lastDNSRecordsDate := time.Unix(domainAttributes.LastDNSRecordsDate, 0).Format("2006-01-02 15:04:05")
+	lastHTTPSCertDate := time.Unix(domainAttributes.LastHTTPSCertDate, 0).Format("2006-01-02 15:04:05")
+	lastUpdateDate := time.Unix(domainAttributes.LastUpdateDate, 0).Format("2006-01-02 15:04:05")
+	whoisDate := time.Unix(domainAttributes.WhoisDate, 0).Format("2006-01-02 15:04:05")
+
+	fmt.Printf("TLD        : %s\n", domainAttributes.TLD)
+	fmt.Printf("Reputation : %d\n", domainAttributes.Reputation)
+	fmt.Printf("JARM       : %s\n", domainAttributes.JARM)
+
+	if len(domainAttributes.Tags) == 0 {
+		fmt.Println("Tags       : None")
+	} else {
+		fmt.Printf("Tags        : %s\n", strings.Join(domainAttributes.Tags, ", "))
+	}
+
+	fmt.Println()
+	fmt.Println("Dates:")
+	fmt.Printf("  Created       : %s\n", creationDate)
+	fmt.Printf("  Last Updated  : %s\n", lastUpdateDate)
+	fmt.Printf("  Last Analysis : %s\n", lastAnalysisDate)
+	fmt.Printf("  Last DNS      : %s\n", lastDNSRecordsDate)
+	fmt.Printf("  Last HTTPS    : %s\n", lastHTTPSCertDate)
+	fmt.Printf("  Modified      : %s\n", lastModificationDate)
+	fmt.Printf("  WHOIS Date    : %s\n", whoisDate)
+
+	fmt.Println()
+	fmt.Println("Last Analysis:")
+	fmt.Printf("  Malicious  : " + DarkTheme.Red + "%s\n" + DarkTheme.Reset, strconv.Itoa(domainAttributes.LastAnalysisStats.Malicious))
+	fmt.Printf("  Suspicious : " + DarkTheme.Yellow + "%s\n" + DarkTheme.Reset, strconv.Itoa(domainAttributes.LastAnalysisStats.Suspicious))
+	fmt.Printf("  Harmless   : " + DarkTheme.Green + "%s\n" + DarkTheme.Reset, strconv.Itoa(domainAttributes.LastAnalysisStats.Harmless))
+	fmt.Printf("  Undetected : %d\n", domainAttributes.LastAnalysisStats.Undetected)
+	fmt.Printf("  Timeout    : " + DarkTheme.Red + "%s\n" + DarkTheme.Reset, strconv.Itoa(domainAttributes.LastAnalysisStats.Timeout))
+
+	fmt.Println()
+	fmt.Println("Community Votes:")
+	fmt.Printf("  Harmless  : " + DarkTheme.Green + "%s\n" + DarkTheme.Reset, strconv.Itoa(domainAttributes.TotalVotes.Harmless))
+	fmt.Printf("  Malicious : " + DarkTheme.Red + "%s\n" + DarkTheme.Reset, strconv.Itoa(domainAttributes.TotalVotes.Malicious))
+
+	fmt.Println()
+	fmt.Println("HTTPS Certificate:")
+	fmt.Printf("  Subject           : %s\n", domainAttributes.LastHTTPSCertificate.Subject.CN)
+	fmt.Printf("  Issuer            : %s (%s)\n", domainAttributes.LastHTTPSCertificate.Issuer.O, domainAttributes.LastHTTPSCertificate.Issuer.CN)
+	fmt.Printf("  Serial            : %s\n", domainAttributes.LastHTTPSCertificate.SerialNumber)
+	fmt.Printf("  Thumbprint        : %s\n", domainAttributes.LastHTTPSCertificate.Thumbprint)
+	fmt.Printf("  Thumbprint SHA256 : %s\n", domainAttributes.LastHTTPSCertificate.ThumbprintSHA256)
+	fmt.Printf("  Version           :           %s\n", domainAttributes.LastHTTPSCertificate.Version)
+	fmt.Printf("  Valid From        : %s\n", domainAttributes.LastHTTPSCertificate.Validity.NotBefore)
+	fmt.Printf("  Valid Until       : %s\n", domainAttributes.LastHTTPSCertificate.Validity.NotAfter)
+
+	fmt.Println()
+	fmt.Println("DNS Records:")
+	dnsTable := tablewriter.NewTable(os.Stdout)
+	dnsTable.Header([]string{"Type", "TTL", "Value"})
+	for _, record := range domainAttributes.LastDNSRecords {
+		dnsTable.Append([]string{record.Type, fmt.Sprintf("%d", record.TTL), record.Value})
+	}
+	dnsTable.Render()
+
+	fmt.Println()
+	fmt.Println("RDAP:")
+	fmt.Printf("  Handle: %s\n", domainAttributes.RDAP.Handle)
+	fmt.Printf("  Status: %s\n", strings.Join(domainAttributes.RDAP.Status, ", "))
+	fmt.Println("  Nameservers:")
+	for _, ns := range domainAttributes.RDAP.Nameservers {
+		fmt.Printf("    - %s\n", ns.LdhName)
+	}
+	fmt.Println("  Events:")
+	for _, event := range domainAttributes.RDAP.Events {
+		fmt.Printf("    - %-35s %s\n", event.EventAction+":", event.EventDate)
+	}
+
+	fmt.Println("  Secure DNS:")
+	fmt.Printf("    Delegation Signed : %v\n", domainAttributes.RDAP.SecureDNS.DelegationSigned)
+	fmt.Printf("    Zone Signed       : %v\n", domainAttributes.RDAP.SecureDNS.ZoneSigned)
+	if len(domainAttributes.RDAP.SecureDNS.DSData) > 0 {
+			fmt.Println("    DS Data:")
+			for _, ds := range domainAttributes.RDAP.SecureDNS.DSData {
+					fmt.Printf("      Algorithm: %d | Digest Type: %d | Key Tag: %d\n", ds.Algorithm, ds.DigestType, ds.KeyTag)
+					fmt.Printf("      Digest: %s\n", ds.Digest)
+			}
+	}
+
+	fmt.Println("  Notices:")
+	for _, notice := range domainAttributes.RDAP.Notices {
+			fmt.Printf("    [%s]\n", notice.Title)
+			for _, desc := range notice.Description {
+					fmt.Printf("      %s\n", desc)
+			}
+	}
+
+	fmt.Println("  Entities:")
+	for _, entity := range domainAttributes.RDAP.Entities {
+			fmt.Printf("    Role: %s\n", strings.Join(entity.Roles, ", "))
+			for _, vcard := range entity.VCardArray {
+					if vcard.Name == "fn" {
+							fmt.Printf("    Name: %s\n", strings.Join(vcard.Values, ", "))
+					}
+					if vcard.Name == "email" {
+							fmt.Printf("    Email: %s\n", strings.Join(vcard.Values, ", "))
+					}
+					if vcard.Name == "tel" {
+							fmt.Printf("    Phone: %s\n", strings.Join(vcard.Values, ", "))
+					}
+			}
+			fmt.Println()
+	}
+
+	fmt.Println()
+	fmt.Println("WHOIS:")
+	fmt.Println(domainAttributes.Whois)
+
+	fmt.Println()
+	fmt.Println("Engine Results:")
+	enginesTable := tablewriter.NewTable(os.Stdout)
+	enginesTable.Header([]string{"Engine", "Method", "Category", "Result"})
+
+	var colourCodedCategory string
+	var colourCodedResult string
+
+	for _, result := range domainAttributes.LastAnalysisResults {
+
+		if result.Category == "harmless" {
+			colourCodedCategory = DarkTheme.Green + result.Category + DarkTheme.Reset
+			colourCodedResult   = DarkTheme.Green + result.Result + DarkTheme.Reset
+		} else if result.Category == "malicious" {
+			colourCodedCategory = DarkTheme.Red + result.Category + DarkTheme.Reset
+			colourCodedResult   = DarkTheme.Red + result.Result + DarkTheme.Reset
+		} else {
+			colourCodedCategory = result.Category
+			colourCodedResult   = result.Result
+		}
+
+		enginesTable.Append([]string{result.EngineName, result.Method, colourCodedCategory, colourCodedResult})
+	}
+	enginesTable.Render()
+}
