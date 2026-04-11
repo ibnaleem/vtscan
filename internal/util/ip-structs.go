@@ -1,11 +1,6 @@
 package util
 
-type AnalysisResult struct {
-	Method     string `json:"method"`
-	EngineName string `json:"engine_name"`
-	Category   string `json:"category"`
-	Result     string `json:"result"`
-}
+
 
 type AnalysisStats struct {
 	Malicious  int `json:"malicious"`
