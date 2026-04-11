@@ -1,10 +1,14 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
-	
-	"github.com/spf13/cobra"
+	"os"
+	"strings"
+
 	"github.com/ibnaleem/vtscan/internal/client"
+	"github.com/ibnaleem/vtscan/internal/util"
+	"github.com/spf13/cobra"
 )
 
 var domainCmd = &cobra.Command{
@@ -26,16 +30,36 @@ var domainCmd = &cobra.Command{
 
 		for _, domain := range args {
 
-			body, err := client.Get(fmt.Sprintf("domains/%s", domain))
+			body, statusCode, err := client.Get(fmt.Sprintf("domains/%s", domain))
 			
 			if err != nil {
 					return err
 			}
 
-			fmt.Println(string(body))
+			if statusCode != 200 {
+				fmt.Printf("vtscan: nothing found for %s\n", domain)
+				return nil
+			} 
+			
+			var domainResponse util.DomainResponse 
 
+			err = json.Unmarshal(body, &domainResponse)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "vtscan (cmd/domain.go): error unmarshalling JSON for %s: %v\nPlease copy the error message above and raise an issue @ github.com/ibnaleem/vtscan/issues\n", domain, err)
+				return nil
+			}
+
+
+			fmt.Println(strings.Repeat("=", 85))
+			fmt.Println()
+
+			fmt.Printf("Domain     : %s\n", domain)
+
+			util.PrintDomainResponse(domainResponse)
+			
 		}
 
+		
 		return nil
 		
 	},
