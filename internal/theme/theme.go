@@ -50,5 +50,4 @@ func Magenta(s string) string { return DarkTheme.Magenta + s + DarkTheme.Reset }
 func Cyan(s string)  string { return DarkTheme.Cyan + s + DarkTheme.Reset }
 func White(s string) string { return DarkTheme.White + s + DarkTheme.Reset }
 func Gray(s string)      string { return DarkTheme.Gray + s + DarkTheme.Reset }
-func Bold(s string)      string { return DarkTheme.Bold + s + DarkTheme.Reset }
-func Underline(s string) string { return DarkTheme.Underline + s + DarkTheme.Reset }
+func Bold(s string) string { return DarkTheme.Bold + s + DarkTheme.Reset }
