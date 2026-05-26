@@ -2,16 +2,19 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/ibnaleem/vtscan/cmd"
 	"github.com/ibnaleem/vtscan/internal/render"
 	"github.com/ibnaleem/vtscan/internal/util"
-	"github.com/ibnaleem/vtscan/internal/theme"
 )
 
 func main() {
 
-	fmt.Print(theme.Cyan("vtscan") + " -- " + render.Markdown(util.GetRandPhrase()))
+	vtscanTitle := strings.TrimSpace(render.Markdown("**vtscan**"))
+	phraseRender := strings.TrimSpace(render.Markdown(util.GetRandPhrase()))
+
+	fmt.Println(vtscanTitle + " - " + phraseRender)
 
 	cmd.Execute()
 
