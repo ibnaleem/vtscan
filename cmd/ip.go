@@ -173,4 +173,5 @@ err)
 
 func init() {
 	rootCmd.AddCommand(ipCmd)
+	ipCmd.AddCommand(ipCommentsCmd)
 }
