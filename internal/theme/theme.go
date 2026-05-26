@@ -41,3 +41,5 @@ var DarkTheme = Theme{
 	White:     "\033[97m",
 	Gray:      "\033[37m",
 }
+
+func Red(s string) string { return DarkTheme.Red + s + DarkTheme.Reset }
