@@ -1,8 +1,11 @@
 package util
 
+import "math/rand"
+
 var endingPhrasesSlice = []string{
 	"Cogitated for",
 	"Brewed for",
+	"Crunched for",
 	"Contemplated for",
 	"Pondered for",
 	"Ruminated for",
@@ -61,4 +64,8 @@ var endingPhrasesSlice = []string{
 	"Reversed the binary in",
 	"Decompiled and recompiled in",
 	"rm -rf'd the wrong directory and still finished in",
+}
+
+func GetRandEndingPhrase() string {
+	return endingPhrasesSlice[rand.Intn(len(endingPhrasesSlice))]
 }
