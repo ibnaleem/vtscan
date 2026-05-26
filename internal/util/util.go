@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"crypto/sha256"
+
+	"github.com/charmbracelet/glamour"
   "github.com/olekukonko/tablewriter"
 	"github.com/olekukonko/tablewriter/tw"
 )
@@ -62,6 +64,16 @@ func CheckError(err error) {
         fmt.Fprintln(os.Stderr, err)
         os.Exit(1)
     }
+}
+
+func RnederMarkdown(md string) string {
+	out, err := glamour.Render(md, "auto")
+
+	if err != nil {
+		return md // we will default to original text if it cannot be rendered to markdown; no need to exit here
+	}
+
+	return out
 }
 
 func CheckHash(input string) bool {
