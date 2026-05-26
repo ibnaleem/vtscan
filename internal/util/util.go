@@ -29,6 +29,12 @@ type Theme struct {
 	Gray      string // Gray text
 }
 
+func RenderCyan(text string) string {
+
+	return DarkTheme.Cyan + text + DarkTheme.Reset
+
+}
+
 // LightTheme defines colors optimized for light terminal backgrounds.
 var LightTheme = Theme{
 	Reset:     "\033[0m",
@@ -66,7 +72,7 @@ func CheckError(err error) {
     }
 }
 
-func RnederMarkdown(md string) string {
+func RenderMarkdown(md string) string {
 	out, err := glamour.Render(md, "auto")
 
 	if err != nil {
