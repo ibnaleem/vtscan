@@ -34,3 +34,10 @@ type CommentVotes struct {
         Negative int `json:"negative"`
         Abuse    int `json:"abuse"`
 }
+
+type CommentAttributes struct {
+        Date  int64        `json:"date"`
+        Text  string       `json:"text"`
+        Tags  []string     `json:"tags"`
+        Votes CommentVotes `json:"votes"`
+}
