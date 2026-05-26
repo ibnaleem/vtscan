@@ -2,6 +2,8 @@
 
 package util
 
+import "math/rand"
+
 var phrasesSlice = []string{
 	"Did you have your coffee yet?",
 	"I'm proud of you.",
@@ -34,4 +36,8 @@ var phrasesSlice = []string{
 	"Did you log a ticket on Jira?",
 	"Four day weeks, three day weekends.",
 	"cat /etc/passwd | grep root",
+}
+
+func GetRandPhrase() string {
+	return phrasesSlice[rand.Intn(len(phrasesSlice))]
 }
