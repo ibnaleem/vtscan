@@ -4,7 +4,7 @@ package util
 
 var phrasesSlice = []string{
 	"Did you have your coffee yet?",
-	"I'm proud of you",
+	"I'm proud of you.",
 	"OpenSSH is more open than secure...",
 	"It's not a bug, it's an undisclosed feature.",
 	"Trust no one, not even localhost.",
@@ -24,4 +24,14 @@ var phrasesSlice = []string{
 	"It works on my air-gapped machine.",
 	"CVE pending...",
 	"The intern pushed to prod again.",
+	"Don't worry, it's just a test environment.",
+	"An idiot admires complexity.",
+	"A genius admires simplicity.",
+	"An idiot admires complexity and a genius admires simplicity.",
+	"The best way to predict the future is to invent it.",
+	"It _wasn't_ DNS? Oh shit.",
+	"Log a ticket on Jira.",
+	"Did you log a ticket on Jira?",
+	"Four day weeks, three day weekends.",
+	"cat /etc/passwd | grep root",
 }
