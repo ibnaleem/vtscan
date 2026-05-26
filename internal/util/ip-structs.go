@@ -28,3 +28,9 @@ type IPResponse struct {
 		Attributes IPAttributes `json:"attributes"`
 	} `json:"data"`
 }
+
+type CommentVotes struct {
+        Positive int `json:"positive"`
+        Negative int `json:"negative"`
+        Abuse    int `json:"abuse"`
+}
