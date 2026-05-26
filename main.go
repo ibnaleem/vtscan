@@ -10,7 +10,9 @@ import (
 
 func main() {
 
-	fmt.Println(theme.Bold("vtscan") + " - " + util.GetRandPhrase())
+	fmt.Println()
+	fmt.Println(theme.Bold(theme.Cyan("vtscan")) + theme.Gray(" · ") + theme.Gray(util.GetRandPhrase()))
+	fmt.Println()
 
 	cmd.Execute()
 
