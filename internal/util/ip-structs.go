@@ -54,3 +54,20 @@ type CommentAuthorRelationship struct {
 type CommentRelationships struct {
         Author CommentAuthorRelationship `json:"author"`
 }
+
+type IPComment struct {
+        ID            string               `json:"id"`
+        Type          string               `json:"type"`
+        Attributes    CommentAttributes    `json:"attributes"`
+        Relationships CommentRelationships `json:"relationships"`
+}
+
+type IPCommentsMeta struct {
+        Count  int    `json:"count"`
+        Cursor string `json:"cursor"`
+}
+
+type IPCommentsResponse struct {
+        Data []IPComment    `json:"data"`
+        Meta IPCommentsMeta `json:"meta"`
+}
