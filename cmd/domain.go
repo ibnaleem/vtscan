@@ -7,12 +7,13 @@ import (
 	"strings"
 
 	"github.com/ibnaleem/vtscan/internal/client"
-	"github.com/ibnaleem/vtscan/internal/util"
+	"github.com/ibnaleem/vtscan/internal/printer"
+	"github.com/ibnaleem/vtscan/internal/types"
 	"github.com/spf13/cobra"
 )
 
 var domainCmd = &cobra.Command{
-	Use: "domain <domain>",
+	Use:   "domain <domain>",
 	Short: "Get a domain report (returns JSON)",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
@@ -25,49 +26,36 @@ var domainCmd = &cobra.Command{
 		if apiKey == "" {
 			return fmt.Errorf("vtscan: missing VT_API_KEY in environmental variables. Please see the README.md @ github.com/ibnaleem/vtscan to configure your API key")
 		}
-		
-		client := client.NewClient(apiKey)
+
+		c := client.NewClient(apiKey)
 
 		for _, domain := range args {
-
-			body, statusCode, err := client.Get(fmt.Sprintf("domains/%s", domain))
-			
+			body, statusCode, err := c.Get(fmt.Sprintf("domains/%s", domain))
 			if err != nil {
-					return err
+				return err
 			}
-
 			if statusCode != 200 {
 				fmt.Printf("vtscan: nothing found for %s\n", domain)
 				return nil
-			} 
-			
-			var domainResponse util.DomainResponse 
+			}
 
-			err = json.Unmarshal(body, &domainResponse)
-			if err != nil {
+			var domainResponse types.DomainResponse
+			if err = json.Unmarshal(body, &domainResponse); err != nil {
 				fmt.Fprintf(os.Stderr, "vtscan (cmd/domain.go): error unmarshalling JSON for %s: %v\nPlease copy the error message above and raise an issue @ github.com/ibnaleem/vtscan/issues\n", domain, err)
 				return nil
 			}
 
-
 			fmt.Println(strings.Repeat("=", 85))
 			fmt.Println()
-
 			fmt.Printf("Domain     : %s\n", domain)
 
-			util.PrintDomainResponse(domainResponse)
-			
+			printer.DomainResponse(domainResponse)
 		}
 
-		
 		return nil
-		
 	},
 }
 
-
 func init() {
-
 	rootCmd.AddCommand(domainCmd)
-	
 }
