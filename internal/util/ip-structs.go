@@ -41,3 +41,16 @@ type CommentAttributes struct {
         Tags  []string     `json:"tags"`
         Votes CommentVotes `json:"votes"`
 }
+
+type CommentAuthor struct {
+        ID   string `json:"id"`
+        Type string `json:"type"`
+}
+
+type CommentAuthorRelationship struct {
+        Data CommentAuthor `json:"data"`
+}
+
+type CommentRelationships struct {
+        Author CommentAuthorRelationship `json:"author"`
+}
