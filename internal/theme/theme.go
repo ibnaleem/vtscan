@@ -43,4 +43,5 @@ var DarkTheme = Theme{
 }
 
 func Red(s string) string   { return DarkTheme.Red + s + DarkTheme.Reset }
-func Green(s string) string { return DarkTheme.Green + s + DarkTheme.Reset }
+func Green(s string)  string { return DarkTheme.Green + s + DarkTheme.Reset }
+func Yellow(s string) string { return DarkTheme.Yellow + s + DarkTheme.Reset }
