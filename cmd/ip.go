@@ -133,21 +133,18 @@ var ipCommentsCmd = &cobra.Command{
         Short:   "Get comments on an IP address",
         RunE: func(cmd *cobra.Command, args []string) error {
                 if len(args) == 0 {
-                        return fmt.Errorf("vtscan: missing IP address argument\n\nUsage:\n  vtscan ip commen
-ts <ip address>")
+                        return fmt.Errorf("vtscan: missing IP address argument\n\nUsage:\n  vtscan ip comments <ip address>")
                 }
 
                 apiKey := GetAPIKey()
                 if apiKey == "" {
-                        return fmt.Errorf("vtscan: missing VT_API_KEY in environmental variables. Please see
- the README.md @ github.com/ibnaleem/vtscan to configure your API key")
+                        return fmt.Errorf("vtscan: missing VT_API_KEY in environmental variables. Please seethe README.md @ github.com/ibnaleem/vtscan to configure your API key")
                 }
 
                 c := client.NewClient(apiKey)
 
                 for _, ip := range args {
-                        body, statusCode, err := c.Get(fmt.Sprintf("ip_addresses/%s/comments?relationships=a
-uthor", ip))
+                        body, statusCode, err := c.Get(fmt.Sprintf("ip_addresses/%s/comments?relationships=author", ip))
                         if err != nil {
                                 return err
                         }
@@ -158,9 +155,7 @@ uthor", ip))
 
                         var resp util.IPCommentsResponse
                         if err := json.Unmarshal(body, &resp); err != nil {
-                                fmt.Fprintf(os.Stderr, "vtscan (cmd/ip.go): error unmarshalling comments for
- %s: %v\nPlease copy the error message above and raise an issue @ github.com/ibnaleem/vtscan/issues\n", ip,
-err)
+                                fmt.Fprintf(os.Stderr, "vtscan (cmd/ip.go): error unmarshalling comments for %s: %v\nPlease copy the error message above and raise an issue @ github.com/ibnaleem/vtscan/issues\n", ip,err)
                                 continue
                         }
 
