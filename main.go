@@ -11,7 +11,7 @@ import (
 func main() {
 
 	fmt.Println()
-	fmt.Println(theme.Bold(theme.Cyan("vtscan")) + theme.Gray(" · ") + theme.Gray(util.GetRandPhrase()))
+	fmt.Println(theme.Bold(theme.Cyan("vtscan")) + theme.Gray(" · ") + theme.Gray(util.GetRandTitlePhrase()))
 	fmt.Println()
 
 	cmd.Execute()
