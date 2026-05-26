@@ -47,3 +47,4 @@ func Green(s string)  string { return DarkTheme.Green + s + DarkTheme.Reset }
 func Yellow(s string) string { return DarkTheme.Yellow + s + DarkTheme.Reset }
 func Blue(s string)    string { return DarkTheme.Blue + s + DarkTheme.Reset }
 func Magenta(s string) string { return DarkTheme.Magenta + s + DarkTheme.Reset }
+func Cyan(s string)    string { return DarkTheme.Cyan + s + DarkTheme.Reset }
