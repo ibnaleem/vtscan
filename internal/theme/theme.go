@@ -49,3 +49,4 @@ func Blue(s string)    string { return DarkTheme.Blue + s + DarkTheme.Reset }
 func Magenta(s string) string { return DarkTheme.Magenta + s + DarkTheme.Reset }
 func Cyan(s string)  string { return DarkTheme.Cyan + s + DarkTheme.Reset }
 func White(s string) string { return DarkTheme.White + s + DarkTheme.Reset }
+func Gray(s string)  string { return DarkTheme.Gray + s + DarkTheme.Reset }
