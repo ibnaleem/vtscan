@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ibnaleem/vtscan/internal/render"
 	"github.com/ibnaleem/vtscan/internal/theme"
 	"github.com/ibnaleem/vtscan/internal/types"
 	"github.com/olekukonko/tablewriter"
@@ -127,7 +128,7 @@ func DomainResponse(d types.DomainResponse) {
 
 	fmt.Println()
 	fmt.Println("WHOIS:")
-	fmt.Println(a.Whois)
+	fmt.Println(render.Markdown(fmt.Sprintf("```%s````", a.Whois)))
 
 	fmt.Println()
 	fmt.Println("Engine Results:")

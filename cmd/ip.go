@@ -9,6 +9,7 @@ import (
 
 	"github.com/ibnaleem/vtscan/internal/client"
 	"github.com/ibnaleem/vtscan/internal/printer"
+	"github.com/ibnaleem/vtscan/internal/render"
 	"github.com/ibnaleem/vtscan/internal/theme"
 	"github.com/ibnaleem/vtscan/internal/types"
 	"github.com/olekukonko/tablewriter"
@@ -80,8 +81,7 @@ var ipCmd = &cobra.Command{
 			fmt.Println()
 
 			fmt.Printf("WHOIS Date: %s\n", whoisDate)
-			fmt.Printf("%s\n", ipResponse.Data.Attributes.Whois)
-
+			fmt.Println(render.Markdown(fmt.Sprintf("```%s```", ipResponse.Data.Attributes.Whois)))
 			table := tablewriter.NewWriter(os.Stdout)
 			table.Header([]string{"Engine", "Method", "Category", "Result"})
 
