@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/ibnaleem/vtscan/internal/client"
 	"github.com/ibnaleem/vtscan/internal/printer"
@@ -45,11 +44,7 @@ var domainCmd = &cobra.Command{
 				return nil
 			}
 
-			fmt.Println(strings.Repeat("=", 85))
-			fmt.Println()
-			fmt.Printf("Domain     : %s\n", domain)
-
-			printer.DomainResponse(domainResponse)
+			printer.DomainResponse(domain, domainResponse)
 		}
 
 		return nil
