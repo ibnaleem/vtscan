@@ -1,56 +1,64 @@
 package printer
 
 import (
+	"bytes"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 	"time"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/ibnaleem/vtscan/internal/render"
 	"github.com/ibnaleem/vtscan/internal/theme"
+	"github.com/ibnaleem/vtscan/internal/tui"
 	"github.com/ibnaleem/vtscan/internal/types"
 	"github.com/olekukonko/tablewriter"
 )
 
-func IPAddressReport(ip string, r types.IPResponse) {
+var (
+	ipHeaderStyle  = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("86")).PaddingLeft(2)
+	ipSectionStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("99")).PaddingLeft(2)
+	ipLabelStyle   = lipgloss.NewStyle().Width(22).Foreground(lipgloss.Color("245")).PaddingLeft(4)
+)
+
+func IPAddressContent(ip string, r types.IPResponse) string {
 	a := r.Data.Attributes
+	var b strings.Builder
 
 	lastAnalysisDate     := time.Unix(a.LastAnalysisDate, 0).Format("2006-01-02 15:04:05")
 	whoisDate            := time.Unix(a.WhoisDate, 0).Format("2006-01-02 15:04:05")
 	lastModificationDate := time.Unix(a.LastModificationDate, 0).Format("2006-01-02 15:04:05")
 
-	fmt.Println(strings.Repeat("=", 85))
-	fmt.Println()
+	b.WriteString("\n")
+	b.WriteString(ipHeaderStyle.Render(ip) + "\n\n")
 
-	fmt.Printf("IP: %s\n", ip)
-	fmt.Printf("Last Modification Date: %s\n", lastModificationDate)
-	fmt.Printf("Reputation: %d\n", a.Reputation)
-
+	b.WriteString(ipLabelStyle.Render("Modified") + lastModificationDate + "\n")
+	b.WriteString(ipLabelStyle.Render("Reputation") + fmt.Sprintf("%d", a.Reputation) + "\n")
 	if len(a.Tags) == 0 {
-		fmt.Println("Tags: None")
+		b.WriteString(ipLabelStyle.Render("Tags") + "None\n")
 	} else {
-		fmt.Printf("Tags: %s\n", strings.Join(a.Tags, ", "))
+		b.WriteString(ipLabelStyle.Render("Tags") + strings.Join(a.Tags, ", ") + "\n")
 	}
-	fmt.Println()
 
-	fmt.Printf("Last Analysis: %s\n", lastAnalysisDate)
-	fmt.Printf("  Malicious:  %s\n", theme.Red(fmt.Sprintf("%d", a.LastAnalysisStats.Malicious)))
-	fmt.Printf("  Suspicious: %s\n", theme.Yellow(fmt.Sprintf("%d", a.LastAnalysisStats.Suspicious)))
-	fmt.Printf("  Harmless:   %s\n", theme.Green(fmt.Sprintf("%d", a.LastAnalysisStats.Harmless)))
-	fmt.Printf("  Undetected: %s\n", theme.Gray(fmt.Sprintf("%d", a.LastAnalysisStats.Undetected)))
-	fmt.Printf("  Timeout:    %s\n", theme.Red(fmt.Sprintf("%d", a.LastAnalysisStats.Timeout)))
-	fmt.Println()
+	b.WriteString("\n" + ipSectionStyle.Render("── Analysis") + "\n\n")
+	b.WriteString(ipLabelStyle.Render("Date") + lastAnalysisDate + "\n")
+	b.WriteString(ipLabelStyle.Render("Malicious") + theme.Red(fmt.Sprintf("%d", a.LastAnalysisStats.Malicious)) + "\n")
+	b.WriteString(ipLabelStyle.Render("Suspicious") + theme.Yellow(fmt.Sprintf("%d", a.LastAnalysisStats.Suspicious)) + "\n")
+	b.WriteString(ipLabelStyle.Render("Harmless") + theme.Green(fmt.Sprintf("%d", a.LastAnalysisStats.Harmless)) + "\n")
+	b.WriteString(ipLabelStyle.Render("Undetected") + theme.Gray(fmt.Sprintf("%d", a.LastAnalysisStats.Undetected)) + "\n")
+	b.WriteString(ipLabelStyle.Render("Timeout") + theme.Red(fmt.Sprintf("%d", a.LastAnalysisStats.Timeout)) + "\n")
 
-	fmt.Println("Community Votes:")
-	fmt.Printf("  Harmless:  %s\n", theme.Green(fmt.Sprintf("%d", a.TotalVotes.Harmless)))
-	fmt.Printf("  Malicious: %s\n", theme.Red(fmt.Sprintf("%d", a.TotalVotes.Malicious)))
-	fmt.Println()
+	b.WriteString("\n" + ipSectionStyle.Render("── Community Votes") + "\n\n")
+	b.WriteString(ipLabelStyle.Render("Harmless") + theme.Green(fmt.Sprintf("%d", a.TotalVotes.Harmless)) + "\n")
+	b.WriteString(ipLabelStyle.Render("Malicious") + theme.Red(fmt.Sprintf("%d", a.TotalVotes.Malicious)) + "\n")
 
-	fmt.Printf("WHOIS Date: %s\n", whoisDate)
-	fmt.Println(render.Markdown(fmt.Sprintf("```%s```", a.Whois)))
+	b.WriteString("\n" + ipSectionStyle.Render("── WHOIS") + "\n\n")
+	b.WriteString(ipLabelStyle.Render("Date") + whoisDate + "\n")
+	b.WriteString(render.Markdown(fmt.Sprintf("```\n%s\n```", a.Whois)))
 
-	table := tablewriter.NewWriter(os.Stdout)
+	b.WriteString(ipSectionStyle.Render("── Engine Results") + "\n\n")
+	var tableBuf bytes.Buffer
+	table := tablewriter.NewWriter(&tableBuf)
 	table.Header([]string{"Engine", "Method", "Category", "Result"})
 	for _, entry := range a.LastAnalysisResults {
 		var cat, res string
@@ -71,7 +79,17 @@ func IPAddressReport(ip string, r types.IPResponse) {
 		table.Append([]string{entry.EngineName, entry.Method, cat, res})
 	}
 	table.Render()
-	fmt.Println()
+	b.WriteString(tableBuf.String())
+	b.WriteString("\n")
+
+	return b.String()
+}
+
+func IPAddressReport(ip string, r types.IPResponse) {
+	content := IPAddressContent(ip, r)
+	if err := tui.Render(content); err != nil {
+		fmt.Print(content)
+	}
 }
 
 func IPComments(w io.Writer, ip string, resp types.IPCommentsResponse) {
