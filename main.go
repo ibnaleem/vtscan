@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ibnaleem/vtscan/cmd"
+	"github.com/ibnaleem/vtscan/internal/render"
 	"github.com/ibnaleem/vtscan/internal/theme"
 	"github.com/ibnaleem/vtscan/internal/util"
 )
@@ -19,6 +20,6 @@ func main() {
 	cmd.Execute()
 	elapsed := time.Since(start)
 
-	fmt.Println(theme.Gray("✦ " + util.GetRandEndingPhrase() + " " + elapsed.Round(time.Millisecond).String()))
+	fmt.Println(render.Markdown(fmt.Sprintf("*✦ %s %s*", util.GetRandEndingPhrase(), elapsed.Round(time.Millisecond).String())))
 
 }
