@@ -92,12 +92,16 @@ func IPAddressReport(ip string, r types.IPResponse) {
 	}
 }
 
-func IPComments(w io.Writer, ip string, resp types.IPCommentsResponse) {
-	fmt.Fprintf(w, "Comments for %s (%d on this page)\n\n", ip, resp.Meta.Count)
+func IPCommentsContent(ip string, resp types.IPCommentsResponse) string {
+	var b strings.Builder
+
+	b.WriteString("\n")
+	b.WriteString(ipHeaderStyle.Render(fmt.Sprintf("Comments for %s", ip)) + "\n")
+	b.WriteString(ipSectionStyle.Render(fmt.Sprintf("  %d comment(s)", resp.Meta.Count)) + "\n\n")
 
 	if len(resp.Data) == 0 {
-		fmt.Fprintln(w, "No comments found.")
-		return
+		b.WriteString("  No comments found.\n")
+		return b.String()
 	}
 
 	for i, c := range resp.Data {
@@ -106,15 +110,24 @@ func IPComments(w io.Writer, ip string, resp types.IPCommentsResponse) {
 		if author == "" {
 			author = "unknown"
 		}
-		fmt.Fprintf(w, "[%d] %s  by %s\n", i+1, date, author)
+
+		b.WriteString(ipSectionStyle.Render(fmt.Sprintf("── [%d] %s  by %s", i+1, date, author)) + "\n")
+
 		if len(c.Attributes.Tags) > 0 {
-			fmt.Fprintf(w, "    Tags: %s\n", strings.Join(c.Attributes.Tags, ", "))
+			b.WriteString(ipLabelStyle.Render("Tags") + strings.Join(c.Attributes.Tags, ", ") + "\n")
 		}
-		fmt.Fprintf(w, "    Votes: +%d / -%d (abuse: %d)\n", c.Attributes.Votes.Positive, c.Attributes.Votes.Negative, c.Attributes.Votes.Abuse)
-		fmt.Fprintf(w, "    %s\n\n", c.Attributes.Text)
+
+		b.WriteString(ipLabelStyle.Render("Votes") + fmt.Sprintf("+%d / -%d (abuse: %d)",
+			c.Attributes.Votes.Positive, c.Attributes.Votes.Negative, c.Attributes.Votes.Abuse) + "\n")
+		b.WriteString("\n    " + c.Attributes.Text + "\n\n")
 	}
 
-	if resp.Meta.Cursor != "" {
-		fmt.Fprintln(w, "Note: more comments exist. Pagination not yet implemented.")
+	return b.String()
+}
+
+func IPComments(w io.Writer, ip string, resp types.IPCommentsResponse) {
+	content := IPCommentsContent(ip, resp)
+	if err := tui.Render(content); err != nil {
+		fmt.Fprint(w, content)
 	}
 }
