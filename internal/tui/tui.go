@@ -53,7 +53,6 @@ func (m model) View() string {
 func Render(content string) error {
 	p := tea.NewProgram(
 		model{content: content},
-		tea.WithAltScreen(),
 		tea.WithMouseCellMotion(),
 	)
 	_, err := p.Run()
