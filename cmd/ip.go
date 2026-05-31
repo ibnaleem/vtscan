@@ -4,15 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
-	"time"
 
 	"github.com/ibnaleem/vtscan/internal/client"
 	"github.com/ibnaleem/vtscan/internal/printer"
-	"github.com/ibnaleem/vtscan/internal/render"
-	"github.com/ibnaleem/vtscan/internal/theme"
 	"github.com/ibnaleem/vtscan/internal/types"
-	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
 
@@ -49,62 +44,7 @@ var ipCmd = &cobra.Command{
 				return nil
 			}
 
-			lastAnalysisDate     := time.Unix(ipResponse.Data.Attributes.LastAnalysisDate, 0).Format("2006-01-02 15:04:05")
-			whoisDate            := time.Unix(ipResponse.Data.Attributes.WhoisDate, 0).Format("2006-01-02 15:04:05")
-			lastModificationDate := time.Unix(ipResponse.Data.Attributes.LastModificationDate, 0).Format("2006-01-02 15:04:05")
-
-			fmt.Println(strings.Repeat("=", 85))
-			fmt.Println()
-
-			fmt.Printf("IP: %s\n", ip)
-			fmt.Printf("Last Modification Date: %s\n", lastModificationDate)
-			fmt.Printf("Reputation: %d\n", ipResponse.Data.Attributes.Reputation)
-
-			if len(ipResponse.Data.Attributes.Tags) == 0 {
-				fmt.Println("Tags: None")
-			} else {
-				fmt.Printf("Tags: %s\n", strings.Join(ipResponse.Data.Attributes.Tags, ", "))
-			}
-			fmt.Println()
-
-			fmt.Printf("Last Analysis: %s\n", lastAnalysisDate)
-			fmt.Printf("  Malicious:  %s\n", theme.Red(fmt.Sprintf("%d", ipResponse.Data.Attributes.LastAnalysisStats.Malicious)))
-			fmt.Printf("  Suspicious: %s\n", theme.Yellow(fmt.Sprintf("%d", ipResponse.Data.Attributes.LastAnalysisStats.Suspicious)))
-			fmt.Printf("  Harmless:   %s\n", theme.Green(fmt.Sprintf("%d", ipResponse.Data.Attributes.LastAnalysisStats.Harmless)))
-			fmt.Printf("  Undetected: %s\n", theme.Gray(fmt.Sprintf("%d", ipResponse.Data.Attributes.LastAnalysisStats.Undetected)))
-			fmt.Printf("  Timeout:    %s\n", theme.Red(fmt.Sprintf("%d", ipResponse.Data.Attributes.LastAnalysisStats.Timeout)))
-			fmt.Println()
-
-			fmt.Println("Community Votes:")
-			fmt.Printf("  Harmless:  %s\n", theme.Green(fmt.Sprintf("%d", ipResponse.Data.Attributes.TotalVotes.Harmless)))
-			fmt.Printf("  Malicious: %s\n", theme.Red(fmt.Sprintf("%d", ipResponse.Data.Attributes.TotalVotes.Malicious)))
-			fmt.Println()
-
-			fmt.Printf("WHOIS Date: %s\n", whoisDate)
-			fmt.Println(render.Markdown(fmt.Sprintf("```%s```", ipResponse.Data.Attributes.Whois)))
-			table := tablewriter.NewWriter(os.Stdout)
-			table.Header([]string{"Engine", "Method", "Category", "Result"})
-
-			for _, entry := range ipResponse.Data.Attributes.LastAnalysisResults {
-				var cat, res string
-				switch entry.Result {
-				case "clean":
-					cat = theme.Green(entry.Category)
-					res = theme.Green(entry.Result)
-				case "malicious":
-					cat = theme.Red(entry.Category)
-					res = theme.Red(entry.Result)
-				case "unrated":
-					cat = theme.Gray(entry.Category)
-					res = theme.Gray(entry.Result)
-				default:
-					cat = entry.Category
-					res = entry.Result
-				}
-				table.Append([]string{entry.EngineName, entry.Method, cat, res})
-			}
-			table.Render()
-			fmt.Println()
+			printer.IPAddressReport(ip, ipResponse)
 		}
 
 		return nil
