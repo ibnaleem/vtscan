@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 
 	"github.com/ibnaleem/vtscan/internal/client"
@@ -68,22 +69,47 @@ var ipCommentsCmd = &cobra.Command{
 		c := client.NewClient(apiKey)
 
 		for _, ip := range args {
-			body, statusCode, err := c.Get(fmt.Sprintf("ip_addresses/%s/comments?relationships=author", ip))
-			if err != nil {
-				return err
-			}
-			if statusCode != 200 {
-				fmt.Printf("vtscan: no comments found for %s\n", ip)
-				continue
+			var allComments []types.IPComment
+			cursor := ""
+
+			for {
+				endpoint := fmt.Sprintf("ip_addresses/%s/comments?relationships=author", ip)
+				if cursor != "" {
+					endpoint += "&cursor=" + url.QueryEscape(cursor)
+				}
+
+				body, statusCode, err := c.Get(endpoint)
+				if err != nil {
+					return err
+				}
+				if statusCode != 200 {
+					if len(allComments) == 0 {
+						fmt.Printf("vtscan: no comments found for %s\n", ip)
+					}
+					break
+				}
+
+				var resp types.IPCommentsResponse
+				if err := json.Unmarshal(body, &resp); err != nil {
+					fmt.Fprintf(os.Stderr, "vtscan (cmd/ip.go): error unmarshalling comments for %s: %v\nPlease copy the error message above and raise an issue @ github.com/ibnaleem/vtscan/issues\n", ip, err)
+					break
+				}
+
+				allComments = append(allComments, resp.Data...)
+
+				if resp.Meta.Cursor == "" {
+					break
+				}
+				cursor = resp.Meta.Cursor
 			}
 
-			var resp types.IPCommentsResponse
-			if err := json.Unmarshal(body, &resp); err != nil {
-				fmt.Fprintf(os.Stderr, "vtscan (cmd/ip.go): error unmarshalling comments for %s: %v\nPlease copy the error message above and raise an issue @ github.com/ibnaleem/vtscan/issues\n", ip, err)
-				continue
+			if len(allComments) > 0 {
+				combined := types.IPCommentsResponse{
+					Data: allComments,
+					Meta: types.IPCommentsMeta{Count: len(allComments)},
+				}
+				printer.IPComments(os.Stdout, ip, combined)
 			}
-
-			printer.IPComments(os.Stdout, ip, resp)
 		}
 
 		return nil
