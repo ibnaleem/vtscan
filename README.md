@@ -19,10 +19,10 @@
   <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/ibnaleem/vtscan">
 </p>
 
-**`vtscan`** is a command-line tool for scanning files, URLs, and IPs against VirusTotal's malware detection. It makes it easier for developers, sercurity researchers, and pretty much anyone that uses a terminal a lot to quickly get a verdict of a file, IP, URL, and more. It was developed after I grew tired of trying to find a file via the GUI to upload to VirusTotal. Sometimes its on the desktop, often times its in some obscure path that takes us forever to traverse.
+**`vtscan`** is a command-line tool for scanning files, URLs, and IPs against VirusTotal's malware detection. It makes it easier for developers, sercurity researchers, TUI users to get a verdict of a file, IP, URL, hash and more. It was developed after I grew tired of trying to find a file via the GUI to upload to VirusTotal. Sometimes its on the desktop, often times its in some obscure path that takes us forever to traverse.
 
 ## 🚀 Getting Started
-After you've ran the install command above, you should obtain an API key from VirusTotal and specify it in your environmental variables as `VT_API_KEY`. Please look up how to setup an environmental variable for your OS.
+After you've ran the install command above, you should obtain an API key from VirusTotal and specify it in your environmental variables as `VT_API_KEY`. API keys are usually free, unless you're subscribed. Please look up how to setup an environmental variable for your OS.
 
 ## 🔍 Searching Files & Hashes
 `vtscan` will automatically calculate a SHA256 hash of your file to search VirusTotal's API. You can specify as many files or hashes as you need, and `vtscan` will do the rest for you:
@@ -41,6 +41,11 @@ The hash specified in the argument does not have to be SHA256: it could be eithe
 $ vtscan ip <ip address 1> <ip address 2> <ip address 3>...
 ```
 
+## 🔍 Searching Comments on an IP Address
+```bash
+$ vtscan ip comments <ip address 1>
+```
+
 ## 🔍 Searching Domains
 ```bash
 $ vtscan domain <domain 1> <domain 2> <domain 3>...
@@ -50,12 +55,11 @@ $ vtscan domain <domain 1> <domain 2> <domain 3>...
 These are the following API endpoints that are planned for implementation
 ### IP Addresses
 1. [Request an IP address (re)scan](https://docs.virustotal.com/reference/rescan-ip) `POST`
-2. [Get comments on an IP address](https://docs.virustotal.com/reference/ip-comments-get) `GET`
-3. [Add a comment to an IP address](https://docs.virustotal.com/reference/ip-comments-post) `POST`
-4. [Get objects related to an IP address](https://docs.virustotal.com/reference/ip-relationships) `GET`
-5. [Get object descriptors related to an IP address](docs.virustotal.com/reference/ip-relationships-ids) `GET`
-6. [Get votes on an IP address](https://docs.virustotal.com/reference/ip-votes) `GET`
-7. [Add a vote to an IP address](https://docs.virustotal.com/reference/ip-votes-post) `POST`
+2. [Add a comment to an IP address](https://docs.virustotal.com/reference/ip-comments-post) `POST`
+3. [Get objects related to an IP address](https://docs.virustotal.com/reference/ip-relationships) `GET`
+4. [Get object descriptors related to an IP address](docs.virustotal.com/reference/ip-relationships-ids) `GET`
+5. [Get votes on an IP address](https://docs.virustotal.com/reference/ip-votes) `GET`
+6. [Add a vote to an IP address](https://docs.virustotal.com/reference/ip-votes-post) `POST`
 
 ### Domains & Resolutions
 1. [Request an domain (re)scan](https://docs.virustotal.com/reference/domains-rescan) `POST`
