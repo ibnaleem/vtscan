@@ -19,7 +19,7 @@
   <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/ibnaleem/vtscan">
 </p>
 
-**`vtscan`** is a command-line tool for scanning files, URLs, and IPs against VirusTotal's malware detection. It makes it easier for developers, sercurity researchers, TUI users to get a verdict of a file, IP, URL, hash and more. It was developed after I grew tired of trying to find a file via the GUI to upload to VirusTotal. Sometimes its on the desktop, often times its in some obscure path that takes us forever to traverse.
+**`vtscan`** is a command-line tool for scanning files, URLs, and IPs against VirusTotal's malware detection. It makes it easier for developers, sercurity researchers, and TUI users to get a verdict of a file, IP, URL, hash and more. It was developed after I grew tired of trying to find a file via the GUI to upload to VirusTotal. Sometimes its on the desktop, often times its in some obscure path that takes us forever to traverse.
 
 ## 🚀 Getting Started
 After you've ran the install command above, you should obtain an API key from VirusTotal and specify it in your environmental variables as `VT_API_KEY`. API keys are usually free, unless you're subscribed. Please look up how to setup an environmental variable for your OS.
