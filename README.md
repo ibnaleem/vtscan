@@ -46,6 +46,11 @@ $ vtscan ip <ip address 1> <ip address 2> <ip address 3>...
 $ vtscan ip comments <ip address 1>
 ```
 
+## 🔍 Searching Votes on an IP Address
+```bash
+$ vtscan ip votes <ip address 1>
+```
+
 ## 🔍 Searching Domains
 ```bash
 $ vtscan domain <domain 1> <domain 2> <domain 3>...
@@ -63,8 +68,7 @@ These are the following API endpoints that are planned for implementation
 2. [Add a comment to an IP address](https://docs.virustotal.com/reference/ip-comments-post) `POST`
 3. [Get objects related to an IP address](https://docs.virustotal.com/reference/ip-relationships) `GET`
 4. [Get object descriptors related to an IP address](docs.virustotal.com/reference/ip-relationships-ids) `GET`
-5. [Get votes on an IP address](https://docs.virustotal.com/reference/ip-votes) `GET`
-6. [Add a vote to an IP address](https://docs.virustotal.com/reference/ip-votes-post) `POST`
+5. [Add a vote to an IP address](https://docs.virustotal.com/reference/ip-votes-post) `POST`
 
 ### Domains & Resolutions
 1. [Request an domain (re)scan](https://docs.virustotal.com/reference/domains-rescan) `POST`
