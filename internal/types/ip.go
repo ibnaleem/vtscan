@@ -1,5 +1,7 @@
 package types
 
+import "encoding/json"
+
 type IPAttributes struct {
 	WhoisDate            int64                     `json:"whois_date"`
 	LastAnalysisStats    AnalysisStats             `json:"last_analysis_stats"`
@@ -81,4 +83,24 @@ type IPVotesMeta struct {
 type IPVotesResponse struct {
 	Data []IPVote    `json:"data"`
 	Meta IPVotesMeta `json:"meta"`
+}
+
+type IPRelatedObject struct {
+	ID         string          `json:"id"`
+	Type       string          `json:"type"`
+	Attributes json.RawMessage `json:"attributes"`
+}
+
+type RelatedObjectStats struct {
+	LastAnalysisStats *AnalysisStats `json:"last_analysis_stats"`
+}
+
+type IPRelationshipsMeta struct {
+	Count  int    `json:"count"`
+	Cursor string `json:"cursor"`
+}
+
+type IPRelationshipsResponse struct {
+	Data json.RawMessage     `json:"data"`
+	Meta IPRelationshipsMeta `json:"meta"`
 }
