@@ -2,6 +2,7 @@ package printer
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"strings"
@@ -172,6 +173,49 @@ func IPVotesContent(ip string, resp types.IPVotesResponse) string {
 
 func IPVotes(w io.Writer, ip string, resp types.IPVotesResponse) {
 	content := IPVotesContent(ip, resp)
+	if err := tui.Render(content); err != nil {
+		fmt.Fprint(w, content)
+	}
+}
+
+func IPRelationshipsContent(ip, relationship string, objects []types.IPRelatedObject) string {
+	var b strings.Builder
+
+	b.WriteString("\n")
+	b.WriteString(ipHeaderStyle.Render(fmt.Sprintf("%s for %s", relationship, ip)) + "\n")
+	b.WriteString(ipSectionStyle.Render(fmt.Sprintf("  %d object(s)", len(objects))) + "\n\n")
+
+	if len(objects) == 0 {
+		b.WriteString("  No related objects found.\n")
+		return b.String()
+	}
+
+	var tableBuf bytes.Buffer
+	table := tablewriter.NewWriter(&tableBuf)
+	table.Header([]string{"#", "Type", "ID", "Malicious"})
+	for i, o := range objects {
+		malicious := theme.Gray("-")
+		if len(o.Attributes) > 0 {
+			var stats types.RelatedObjectStats
+			if err := json.Unmarshal(o.Attributes, &stats); err == nil && stats.LastAnalysisStats != nil {
+				if m := stats.LastAnalysisStats.Malicious; m > 0 {
+					malicious = theme.Red(fmt.Sprintf("%d", m))
+				} else {
+					malicious = theme.Green("0")
+				}
+			}
+		}
+		table.Append([]string{fmt.Sprintf("%d", i+1), o.Type, o.ID, malicious})
+	}
+	table.Render()
+	b.WriteString(tableBuf.String())
+	b.WriteString("\n")
+
+	return b.String()
+}
+
+func IPRelationships(w io.Writer, ip, relationship string, objects []types.IPRelatedObject) {
+	content := IPRelationshipsContent(ip, relationship, objects)
 	if err := tui.Render(content); err != nil {
 		fmt.Fprint(w, content)
 	}
