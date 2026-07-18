@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 
 	"github.com/ibnaleem/vtscan/internal/client"
@@ -51,6 +52,71 @@ var domainCmd = &cobra.Command{
 	},
 }
 
+var domainCommentsCmd = &cobra.Command{
+	Use:     "comments <domain>",
+	Aliases: []string{"comment"},
+	Short:   "Get comments on a domain",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			return fmt.Errorf("vtscan: missing domain argument\n\nUsage:\n  vtscan domain comments <domain>")
+		}
+
+		apiKey := GetAPIKey()
+		if apiKey == "" {
+			return fmt.Errorf("vtscan: missing VT_API_KEY in environmental variables. Please see the README.md @ github.com/ibnaleem/vtscan to configure your API key")
+		}
+
+		c := client.NewClient(apiKey)
+
+		for _, domain := range args {
+			var allComments []types.IPComment
+			cursor := ""
+
+			for {
+				endpoint := fmt.Sprintf("domains/%s/comments?relationships=author", domain)
+				if cursor != "" {
+					endpoint += "&cursor=" + url.QueryEscape(cursor)
+				}
+
+				body, statusCode, err := c.Get(endpoint)
+				if err != nil {
+					return err
+				}
+				if statusCode != 200 {
+					if len(allComments) == 0 {
+						fmt.Printf("vtscan: no comments found for %s\n", domain)
+					}
+					break
+				}
+
+				var resp types.IPCommentsResponse
+				if err := json.Unmarshal(body, &resp); err != nil {
+					fmt.Fprintf(os.Stderr, "vtscan (cmd/domain.go): error unmarshalling comments for %s: %v\nPlease copy the error message above and raise an issue @ github.com/ibnaleem/vtscan/issues\n", domain, err)
+					break
+				}
+
+				allComments = append(allComments, resp.Data...)
+
+				if resp.Meta.Cursor == "" {
+					break
+				}
+				cursor = resp.Meta.Cursor
+			}
+
+			if len(allComments) > 0 {
+				combined := types.IPCommentsResponse{
+					Data: allComments,
+					Meta: types.IPCommentsMeta{Count: len(allComments)},
+				}
+				printer.DomainComments(os.Stdout, domain, combined)
+			}
+		}
+
+		return nil
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(domainCmd)
+	domainCmd.AddCommand(domainCommentsCmd)
 }
