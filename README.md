@@ -51,6 +51,11 @@ $ vtscan ip comments <ip address 1>
 $ vtscan domain <domain 1> <domain 2> <domain 3>...
 ```
 
+## 🔍 Searching Comments on a Domain
+```bash
+$ vtscan domain comments <domain 1>
+```
+
 ## 🗺️ Roadmap
 These are the following API endpoints that are planned for implementation
 ### IP Addresses
@@ -63,10 +68,9 @@ These are the following API endpoints that are planned for implementation
 
 ### Domains & Resolutions
 1. [Request an domain (re)scan](https://docs.virustotal.com/reference/domains-rescan) `POST`
-2. [Get comments on a domain](https://docs.virustotal.com/reference/domains-comments-get) `GET`
-3. [Add a comment to a domain](https://docs.virustotal.com/reference/domains-comments-post) `POST`
-4. [Get objects related to a domain](https://docs.virustotal.com/reference/domains-relationships) `GET`
-5. [Get object descriptors related to a domain](https://docs.virustotal.com/reference/domains-relationships-ids) `GET`
-6. [Get a DNS resolution object](https://docs.virustotal.com/reference/get-resolution-by-id) `GET`
-7. [Get votes on a domain](https://docs.virustotal.com/reference/domains-votes-get) `GET`
-8. [Add a vote to a domain](https://docs.virustotal.com/reference/domain-votes-post) `POST`
+2. [Add a comment to a domain](https://docs.virustotal.com/reference/domains-comments-post) `POST`
+3. [Get objects related to a domain](https://docs.virustotal.com/reference/domains-relationships) `GET`
+4. [Get object descriptors related to a domain](https://docs.virustotal.com/reference/domains-relationships-ids) `GET`
+5. [Get a DNS resolution object](https://docs.virustotal.com/reference/get-resolution-by-id) `GET`
+6. [Get votes on a domain](https://docs.virustotal.com/reference/domains-votes-get) `GET`
+7. [Add a vote to a domain](https://docs.virustotal.com/reference/domain-votes-post) `POST`
