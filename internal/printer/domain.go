@@ -3,6 +3,7 @@ package printer
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 
@@ -24,13 +25,13 @@ func DomainContent(domain string, d types.DomainResponse) string {
 	a := d.Data.Attributes
 	var b strings.Builder
 
-	creationDate         := time.Unix(a.CreationDate, 0).Format("2006-01-02 15:04:05")
+	creationDate := time.Unix(a.CreationDate, 0).Format("2006-01-02 15:04:05")
 	lastModificationDate := time.Unix(a.LastModificationDate, 0).Format("2006-01-02 15:04:05")
-	lastAnalysisDate     := time.Unix(a.LastAnalysisDate, 0).Format("2006-01-02 15:04:05")
-	lastDNSRecordsDate   := time.Unix(a.LastDNSRecordsDate, 0).Format("2006-01-02 15:04:05")
-	lastHTTPSCertDate    := time.Unix(a.LastHTTPSCertDate, 0).Format("2006-01-02 15:04:05")
-	lastUpdateDate       := time.Unix(a.LastUpdateDate, 0).Format("2006-01-02 15:04:05")
-	whoisDate            := time.Unix(a.WhoisDate, 0).Format("2006-01-02 15:04:05")
+	lastAnalysisDate := time.Unix(a.LastAnalysisDate, 0).Format("2006-01-02 15:04:05")
+	lastDNSRecordsDate := time.Unix(a.LastDNSRecordsDate, 0).Format("2006-01-02 15:04:05")
+	lastHTTPSCertDate := time.Unix(a.LastHTTPSCertDate, 0).Format("2006-01-02 15:04:05")
+	lastUpdateDate := time.Unix(a.LastUpdateDate, 0).Format("2006-01-02 15:04:05")
+	whoisDate := time.Unix(a.WhoisDate, 0).Format("2006-01-02 15:04:05")
 
 	b.WriteString("\n")
 	if domain != "" {
@@ -162,5 +163,12 @@ func DomainResponse(domain string, d types.DomainResponse) {
 	content := DomainContent(domain, d)
 	if err := tui.Render(content); err != nil {
 		fmt.Print(content)
+	}
+}
+
+func DomainComments(w io.Writer, domain string, resp types.IPCommentsResponse) {
+	content := IPCommentsContent(domain, resp)
+	if err := tui.Render(content); err != nil {
+		fmt.Fprint(w, content)
 	}
 }
