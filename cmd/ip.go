@@ -116,7 +116,72 @@ var ipCommentsCmd = &cobra.Command{
 	},
 }
 
+var ipVotesCmd = &cobra.Command{
+	Use:     "votes <ip>",
+	Aliases: []string{"vote"},
+	Short:   "Get votes on an IP address",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			return fmt.Errorf("vtscan: missing IP address argument\n\nUsage:\n  vtscan ip votes <ip address>")
+		}
+
+		apiKey := GetAPIKey()
+		if apiKey == "" {
+			return fmt.Errorf("vtscan: missing VT_API_KEY in environmental variables. Please see the README.md @ github.com/ibnaleem/vtscan to configure your API key")
+		}
+
+		c := client.NewClient(apiKey)
+
+		for _, ip := range args {
+			var allVotes []types.IPVote
+			cursor := ""
+
+			for {
+				endpoint := fmt.Sprintf("ip_addresses/%s/votes", ip)
+				if cursor != "" {
+					endpoint += "?cursor=" + url.QueryEscape(cursor)
+				}
+
+				body, statusCode, err := c.Get(endpoint)
+				if err != nil {
+					return err
+				}
+				if statusCode != 200 {
+					if len(allVotes) == 0 {
+						fmt.Printf("vtscan: no votes found for %s\n", ip)
+					}
+					break
+				}
+
+				var resp types.IPVotesResponse
+				if err := json.Unmarshal(body, &resp); err != nil {
+					fmt.Fprintf(os.Stderr, "vtscan (cmd/ip.go): error unmarshalling votes for %s: %v\nPlease copy the error message above and raise an issue @ github.com/ibnaleem/vtscan/issues\n", ip, err)
+					break
+				}
+
+				allVotes = append(allVotes, resp.Data...)
+
+				if resp.Meta.Cursor == "" {
+					break
+				}
+				cursor = resp.Meta.Cursor
+			}
+
+			if len(allVotes) > 0 {
+				combined := types.IPVotesResponse{
+					Data: allVotes,
+					Meta: types.IPVotesMeta{Count: len(allVotes)},
+				}
+				printer.IPVotes(os.Stdout, ip, combined)
+			}
+		}
+
+		return nil
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(ipCmd)
 	ipCmd.AddCommand(ipCommentsCmd)
+	ipCmd.AddCommand(ipVotesCmd)
 }
