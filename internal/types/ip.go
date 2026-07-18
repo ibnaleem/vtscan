@@ -60,3 +60,25 @@ type IPCommentsResponse struct {
 	Data []IPComment    `json:"data"`
 	Meta IPCommentsMeta `json:"meta"`
 }
+
+type IPVoteAttributes struct {
+	Date    int64  `json:"date"`
+	Verdict string `json:"verdict"`
+	Value   int    `json:"value"`
+}
+
+type IPVote struct {
+	ID         string           `json:"id"`
+	Type       string           `json:"type"`
+	Attributes IPVoteAttributes `json:"attributes"`
+}
+
+type IPVotesMeta struct {
+	Count  int    `json:"count"`
+	Cursor string `json:"cursor"`
+}
+
+type IPVotesResponse struct {
+	Data []IPVote    `json:"data"`
+	Meta IPVotesMeta `json:"meta"`
+}
