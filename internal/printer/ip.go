@@ -25,8 +25,8 @@ func IPAddressContent(ip string, r types.IPResponse) string {
 	a := r.Data.Attributes
 	var b strings.Builder
 
-	lastAnalysisDate     := time.Unix(a.LastAnalysisDate, 0).Format("2006-01-02 15:04:05")
-	whoisDate            := time.Unix(a.WhoisDate, 0).Format("2006-01-02 15:04:05")
+	lastAnalysisDate := time.Unix(a.LastAnalysisDate, 0).Format("2006-01-02 15:04:05")
+	whoisDate := time.Unix(a.WhoisDate, 0).Format("2006-01-02 15:04:05")
 	lastModificationDate := time.Unix(a.LastModificationDate, 0).Format("2006-01-02 15:04:05")
 
 	b.WriteString("\n")
@@ -105,7 +105,7 @@ func IPCommentsContent(ip string, resp types.IPCommentsResponse) string {
 	}
 
 	for i, c := range resp.Data {
-		date   := time.Unix(c.Attributes.Date, 0).Format("2006-01-02 15:04:05")
+		date := time.Unix(c.Attributes.Date, 0).Format("2006-01-02 15:04:05")
 		author := c.Relationships.Author.Data.ID
 		if author == "" {
 			author = "unknown"
@@ -127,6 +127,51 @@ func IPCommentsContent(ip string, resp types.IPCommentsResponse) string {
 
 func IPComments(w io.Writer, ip string, resp types.IPCommentsResponse) {
 	content := IPCommentsContent(ip, resp)
+	if err := tui.Render(content); err != nil {
+		fmt.Fprint(w, content)
+	}
+}
+
+func IPVotesContent(ip string, resp types.IPVotesResponse) string {
+	var b strings.Builder
+
+	b.WriteString("\n")
+	b.WriteString(ipHeaderStyle.Render(fmt.Sprintf("Votes for %s", ip)) + "\n")
+	b.WriteString(ipSectionStyle.Render(fmt.Sprintf("  %d vote(s)", resp.Meta.Count)) + "\n\n")
+
+	if len(resp.Data) == 0 {
+		b.WriteString("  No votes found.\n")
+		return b.String()
+	}
+
+	var harmless, malicious int
+	for _, v := range resp.Data {
+		if v.Attributes.Value >= 0 {
+			harmless++
+		} else {
+			malicious++
+		}
+	}
+	b.WriteString(ipLabelStyle.Render("Harmless") + theme.Green(fmt.Sprintf("%d", harmless)) + "\n")
+	b.WriteString(ipLabelStyle.Render("Malicious") + theme.Red(fmt.Sprintf("%d", malicious)) + "\n\n")
+
+	for i, v := range resp.Data {
+		date := time.Unix(v.Attributes.Date, 0).Format("2006-01-02 15:04:05")
+		verdict := v.Attributes.Verdict
+		if v.Attributes.Value >= 0 {
+			verdict = theme.Green(verdict)
+		} else {
+			verdict = theme.Red(verdict)
+		}
+		b.WriteString(ipSectionStyle.Render(fmt.Sprintf("── [%d] %s", i+1, date)) + "\n")
+		b.WriteString(ipLabelStyle.Render("Verdict") + verdict + "\n\n")
+	}
+
+	return b.String()
+}
+
+func IPVotes(w io.Writer, ip string, resp types.IPVotesResponse) {
+	content := IPVotesContent(ip, resp)
 	if err := tui.Render(content); err != nil {
 		fmt.Fprint(w, content)
 	}
