@@ -67,6 +67,12 @@ $ vtscan domain <domain 1> <domain 2> <domain 3>...
 $ vtscan domain comments <domain 1>
 ```
 
+## 🔍 Searching Votes on a Domain
+```bash
+$ vtscan domain votes <domain 1> <domain 2> <domain 3>...
+```
+Every vote is listed with its date, verdict, weight and vote ID, alongside a harmless/malicious summary. Up to 400 votes are fetched per domain; `vtscan` tells you when a domain has more.
+
 ## 🗺️ Roadmap
 These are the following API endpoints that are planned for implementation
 ### IP Addresses
@@ -81,5 +87,4 @@ These are the following API endpoints that are planned for implementation
 3. [Get objects related to a domain](https://docs.virustotal.com/reference/domains-relationships) `GET`
 4. [Get object descriptors related to a domain](https://docs.virustotal.com/reference/domains-relationships-ids) `GET`
 5. [Get a DNS resolution object](https://docs.virustotal.com/reference/get-resolution-by-id) `GET`
-6. [Get votes on a domain](https://docs.virustotal.com/reference/domains-votes-get) `GET`
-7. [Add a vote to a domain](https://docs.virustotal.com/reference/domain-votes-post) `POST`
+6. [Add a vote to a domain](https://docs.virustotal.com/reference/domain-votes-post) `POST`
