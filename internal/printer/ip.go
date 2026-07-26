@@ -153,20 +153,36 @@ func IPVotesContent(ip string, resp types.IPVotesResponse) string {
 			malicious++
 		}
 	}
+
 	b.WriteString(ipLabelStyle.Render("Harmless") + theme.Green(fmt.Sprintf("%d", harmless)) + "\n")
-	b.WriteString(ipLabelStyle.Render("Malicious") + theme.Red(fmt.Sprintf("%d", malicious)) + "\n\n")
+	b.WriteString(ipLabelStyle.Render("Malicious") + theme.Red(fmt.Sprintf("%d", malicious)) + "\n")
+
+	b.WriteString("\n")
+
+	var tableBuf bytes.Buffer
+	table := tablewriter.NewWriter(&tableBuf)
+	table.Header([]string{"#", "Date", "Verdict", "Value", "Vote ID"})
 
 	for i, v := range resp.Data {
-		date := time.Unix(v.Attributes.Date, 0).Format("2006-01-02 15:04:05")
 		verdict := v.Attributes.Verdict
 		if v.Attributes.Value >= 0 {
 			verdict = theme.Green(verdict)
 		} else {
 			verdict = theme.Red(verdict)
 		}
-		b.WriteString(ipSectionStyle.Render(fmt.Sprintf("── [%d] %s", i+1, date)) + "\n")
-		b.WriteString(ipLabelStyle.Render("Verdict") + verdict + "\n\n")
+
+		table.Append([]string{
+			fmt.Sprintf("%d", i+1),
+			time.Unix(v.Attributes.Date, 0).Format("2006-01-02 15:04:05"),
+			verdict,
+			fmt.Sprintf("%+d", v.Attributes.Value),
+			v.ID,
+		})
 	}
+
+	table.Render()
+	b.WriteString(tableBuf.String())
+	b.WriteString("\n")
 
 	return b.String()
 }
