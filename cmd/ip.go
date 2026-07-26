@@ -180,8 +180,90 @@ var ipVotesCmd = &cobra.Command{
 	},
 }
 
+var ipRelationshipsCmd = &cobra.Command{
+	Use:     "relationships <ip> <relationship>",
+	Aliases: []string{"related", "objects"},
+	Short:   "Get objects related to an IP address",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) < 2 {
+			return fmt.Errorf("vtscan: missing arguments\n\nUsage:\n  vtscan ip relationships <ip address> <relationship>\n\nRelationships: communicating_files, downloaded_files, graphs, historical_ssl_certificates, historical_whois, referrer_files, related_comments, related_references, related_threat_actors, resolutions, urls")
+		}
+
+		apiKey := GetAPIKey()
+		if apiKey == "" {
+			return fmt.Errorf("vtscan: missing VT_API_KEY in environmental variables. Please see the README.md @ github.com/ibnaleem/vtscan to configure your API key")
+		}
+
+		ip := args[0]
+		relationship := args[1]
+
+		c := client.NewClient(apiKey)
+
+		const maxRelationshipPages = 10
+
+		var allObjects []types.IPRelatedObject
+		cursor := ""
+		truncated := false
+
+		for page := 0; ; page++ {
+			if page >= maxRelationshipPages {
+				truncated = true
+				break
+			}
+			endpoint := fmt.Sprintf("ip_addresses/%s/%s?limit=40", ip, relationship)
+			if cursor != "" {
+				endpoint += "&cursor=" + url.QueryEscape(cursor)
+			}
+
+			body, statusCode, err := c.Get(endpoint)
+			if err != nil {
+				return err
+			}
+			if statusCode != 200 {
+				break
+			}
+
+			var resp types.IPRelationshipsResponse
+			if err := json.Unmarshal(body, &resp); err != nil {
+				fmt.Fprintf(os.Stderr, "vtscan (cmd/ip.go): error unmarshalling relationships for %s: %v\nPlease copy the error message above and raise an issue @ github.com/ibnaleem/vtscan/issues\n", ip, err)
+				break
+			}
+
+			var page []types.IPRelatedObject
+			if err := json.Unmarshal(resp.Data, &page); err != nil {
+				var single types.IPRelatedObject
+				if err := json.Unmarshal(resp.Data, &single); err != nil {
+					break
+				}
+				if single.ID != "" {
+					page = append(page, single)
+				}
+			}
+
+			allObjects = append(allObjects, page...)
+
+			if resp.Meta.Cursor == "" {
+				break
+			}
+			cursor = resp.Meta.Cursor
+		}
+
+		if len(allObjects) > 0 {
+			printer.IPRelationships(os.Stdout, ip, relationship, allObjects)
+			if truncated {
+				fmt.Printf("vtscan: page cap reached; showing first %d objects (relationship has more)\n", len(allObjects))
+			}
+		} else {
+			fmt.Printf("vtscan: no %s found for %s\n", relationship, ip)
+		}
+
+		return nil
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(ipCmd)
 	ipCmd.AddCommand(ipCommentsCmd)
 	ipCmd.AddCommand(ipVotesCmd)
+	ipCmd.AddCommand(ipRelationshipsCmd)
 }
