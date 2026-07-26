@@ -172,3 +172,10 @@ func DomainComments(w io.Writer, domain string, resp types.IPCommentsResponse) {
 		fmt.Fprint(w, content)
 	}
 }
+
+func DomainVotes(w io.Writer, domain string, resp types.IPVotesResponse) {
+	content := IPVotesContent(domain, resp)
+	if err := tui.Render(content); err != nil {
+		fmt.Fprint(w, content)
+	}
+}
