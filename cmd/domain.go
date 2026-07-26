@@ -116,7 +116,85 @@ var domainCommentsCmd = &cobra.Command{
 	},
 }
 
+var domainVotesCmd = &cobra.Command{
+	Use:     "votes <domain>",
+	Aliases: []string{"vote"},
+	Short:   "Get votes on a domain",
+	RunE: func(cmd *cobra.Command, args []string) error {
+
+		if len(args) == 0 {
+			return fmt.Errorf("vtscan: missing domain argument\n\nUsage:\n  vtscan domain votes <domain>")
+		}
+
+		apiKey := GetAPIKey()
+
+		if apiKey == "" {
+			return fmt.Errorf("vtscan: missing VT_API_KEY in environmental variables. Please read README.md @ github.com/ibnaleem/vtscan to configure your API key")
+		}
+
+		c := client.NewClient(apiKey)
+
+		const maxVotePages = 10
+
+		for _, domain := range args {
+			var allVotes []types.IPVote
+			cursor := ""
+			truncated := false
+
+			for page := 0; ; page++ {
+				if page >= maxVotePages {
+					truncated = true
+					break
+				}
+
+				endpoint := fmt.Sprintf("domains/%s/votes?limit=40", domain)
+				if cursor != "" {
+					endpoint += "&cursor=" + url.QueryEscape(cursor)
+				}
+
+				body, statusCode, err := c.Get(endpoint)
+				if err != nil {
+					return err
+				}
+				if statusCode != 200 {
+					break
+				}
+
+				var resp types.IPVotesResponse
+				if err := json.Unmarshal(body, &resp); err != nil {
+					fmt.Fprintf(os.Stderr, "vtscan (cmd/domain.go): error unmarshalling votes for %s: %v\nPlease copy the error message above and raise an issue @ github.com/ibnaleem/vtscan/issues\n", domain, err)
+					break
+				}
+
+				allVotes = append(allVotes, resp.Data...)
+
+				if resp.Meta.Cursor == "" {
+					break
+				}
+				cursor = resp.Meta.Cursor
+			}
+
+			if len(allVotes) == 0 {
+				fmt.Printf("vtscan: no votes found for %s\n", domain)
+				continue
+			}
+
+			printer.DomainVotes(os.Stdout, domain, types.IPVotesResponse{
+				Data: allVotes,
+				Meta: types.IPVotesMeta{Count: len(allVotes)},
+			})
+
+			if truncated {
+				fmt.Printf("vtscan: page cap reached; showing the first %d votes for %s (more exist)\n", len(allVotes), domain)
+			}
+		}
+
+		return nil
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(domainCmd)
 	domainCmd.AddCommand(domainCommentsCmd)
+	domainCmd.AddCommand(domainVotesCmd)
 }
