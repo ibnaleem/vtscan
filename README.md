@@ -73,6 +73,12 @@ $ vtscan domain votes <domain 1> <domain 2> <domain 3>...
 ```
 Every vote is listed with its date, verdict, weight and vote ID, alongside a harmless/malicious summary. Up to 400 votes are fetched per domain; `vtscan` tells you when a domain has more.
 
+## 🔍 Getting Objects Related to a Domain
+```bash
+$ vtscan domain relationships <domain> <relationship>
+```
+Where `<relationship>` is one of: `caa_records`, `cname_records`, `comments`, `communicating_files`, `downloaded_files`, `graphs`, `historical_ssl_certificates`, `historical_whois`, `immediate_parent`, `mx_records`, `ns_records`, `parent`, `referrer_files`, `related_comments`, `related_references`, `related_threat_actors`, `resolutions`, `soa_records`, `siblings`, `subdomains`, `urls`, `user_votes`.
+
 ## 🗺️ Roadmap
 These are the following API endpoints that are planned for implementation
 ### IP Addresses
@@ -84,7 +90,6 @@ These are the following API endpoints that are planned for implementation
 ### Domains & Resolutions
 1. [Request an domain (re)scan](https://docs.virustotal.com/reference/domains-rescan) `POST`
 2. [Add a comment to a domain](https://docs.virustotal.com/reference/domains-comments-post) `POST`
-3. [Get objects related to a domain](https://docs.virustotal.com/reference/domains-relationships) `GET`
-4. [Get object descriptors related to a domain](https://docs.virustotal.com/reference/domains-relationships-ids) `GET`
-5. [Get a DNS resolution object](https://docs.virustotal.com/reference/get-resolution-by-id) `GET`
-6. [Add a vote to a domain](https://docs.virustotal.com/reference/domain-votes-post) `POST`
+3. [Get object descriptors related to a domain](https://docs.virustotal.com/reference/domains-relationships-ids) `GET`
+4. [Get a DNS resolution object](https://docs.virustotal.com/reference/get-resolution-by-id) `GET`
+5. [Add a vote to a domain](https://docs.virustotal.com/reference/domain-votes-post) `POST`
