@@ -223,29 +223,18 @@ var ipRelationshipsCmd = &cobra.Command{
 				break
 			}
 
-			var resp types.IPRelationshipsResponse
-			if err := json.Unmarshal(body, &resp); err != nil {
+			objects, meta, err := types.DecodeRelationshipsResponse(body)
+			if err != nil {
 				fmt.Fprintf(os.Stderr, "vtscan (cmd/ip.go): error unmarshalling relationships for %s: %v\nPlease copy the error message above and raise an issue @ github.com/ibnaleem/vtscan/issues\n", ip, err)
 				break
 			}
 
-			var page []types.IPRelatedObject
-			if err := json.Unmarshal(resp.Data, &page); err != nil {
-				var single types.IPRelatedObject
-				if err := json.Unmarshal(resp.Data, &single); err != nil {
-					break
-				}
-				if single.ID != "" {
-					page = append(page, single)
-				}
-			}
+			allObjects = append(allObjects, objects...)
 
-			allObjects = append(allObjects, page...)
-
-			if resp.Meta.Cursor == "" {
+			if meta.Cursor == "" {
 				break
 			}
-			cursor = resp.Meta.Cursor
+			cursor = meta.Cursor
 		}
 
 		if len(allObjects) > 0 {
