@@ -179,3 +179,10 @@ func DomainVotes(w io.Writer, domain string, resp types.IPVotesResponse) {
 		fmt.Fprint(w, content)
 	}
 }
+
+func DomainRelationships(w io.Writer, domain, relationship string, objects []types.IPRelatedObject) {
+	content := IPRelationshipsContent(domain, relationship, objects)
+	if err := tui.Render(content); err != nil {
+		fmt.Fprint(w, content)
+	}
+}
