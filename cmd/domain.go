@@ -193,8 +193,79 @@ var domainVotesCmd = &cobra.Command{
 	},
 }
 
+var domainRelationshipsCmd = &cobra.Command{
+	Use:     "relationships <domain> <relationship>",
+	Aliases: []string{"related", "objects"},
+	Short:   "Get objects related to a domain",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) < 2 {
+			return fmt.Errorf("vtscan: missing arguments\n\nUsage:\n  vtscan domain relationships <domain> <relationship>\n\nRelationships: caa_records, cname_records, comments, communicating_files, downloaded_files, graphs, historical_ssl_certificates, historical_whois, immediate_parent, mx_records, ns_records, parent, referrer_files, related_comments, related_references, related_threat_actors, resolutions, soa_records, siblings, subdomains, urls, user_votes")
+		}
+
+		apiKey := GetAPIKey()
+		if apiKey == "" {
+			return fmt.Errorf("vtscan: missing VT_API_KEY in environmental variables. Please see the README.md @ github.com/ibnaleem/vtscan to configure your API key")
+		}
+
+		domain := args[0]
+		relationship := args[1]
+
+		c := client.NewClient(apiKey)
+
+		const maxRelationshipPages = 10
+
+		var allObjects []types.IPRelatedObject
+		cursor := ""
+		truncated := false
+
+		for page := 0; ; page++ {
+			if page >= maxRelationshipPages {
+				truncated = true
+				break
+			}
+			endpoint := fmt.Sprintf("domains/%s/%s?limit=40", domain, relationship)
+			if cursor != "" {
+				endpoint += "&cursor=" + url.QueryEscape(cursor)
+			}
+
+			body, statusCode, err := c.Get(endpoint)
+			if err != nil {
+				return err
+			}
+			if statusCode != 200 {
+				break
+			}
+
+			objects, meta, err := types.DecodeRelationshipsResponse(body)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "vtscan (cmd/domain.go): error unmarshalling relationships for %s: %v\nPlease copy the error message above and raise an issue @ github.com/ibnaleem/vtscan/issues\n", domain, err)
+				break
+			}
+
+			allObjects = append(allObjects, objects...)
+
+			if meta.Cursor == "" {
+				break
+			}
+			cursor = meta.Cursor
+		}
+
+		if len(allObjects) > 0 {
+			printer.DomainRelationships(os.Stdout, domain, relationship, allObjects)
+			if truncated {
+				fmt.Printf("vtscan: page cap reached; showing first %d objects (relationship has more)\n", len(allObjects))
+			}
+		} else {
+			fmt.Printf("vtscan: no %s found for %s\n", relationship, domain)
+		}
+
+		return nil
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(domainCmd)
 	domainCmd.AddCommand(domainCommentsCmd)
 	domainCmd.AddCommand(domainVotesCmd)
+	domainCmd.AddCommand(domainRelationshipsCmd)
 }
