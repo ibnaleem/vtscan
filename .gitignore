@@ -8,6 +8,9 @@
 *.so
 *.dylib
 
+# vtscan binary for Unix
+vtscan
+
 # Test binary, built with `go test -c`
 *.test
 
@@ -23,3 +26,17 @@ go.work.sum
 
 # env file
 .env
+
+# AI files
+graft/
+.ignore
+.mcp.json
+AGENTS.md
+CLAUDE.md
+.claude/
+
+## Test files
+internal/types/*_test.go
+internal/client/*_test.go
+internal/printer/*_test.go
+cmd/*_test.go
