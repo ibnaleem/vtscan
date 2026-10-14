@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/url"
 	"os"
 
@@ -30,13 +31,17 @@ var ipCmd = &cobra.Command{
 		c := client.NewClient(apiKey)
 
 		for _, ip := range args {
+			if err := checkIP(ip); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				continue
+			}
 			body, statusCode, err := c.Get(fmt.Sprintf("ip_addresses/%s", ip))
 			if err != nil {
 				return err
 			}
 			if statusCode != 200 {
-				fmt.Printf("vtscan: nothing found for %s\n", ip)
-				return nil
+				fmt.Print(ipNotFoundMsg(ip))
+				continue
 			}
 
 			var ipResponse types.IPResponse
@@ -250,9 +255,81 @@ var ipRelationshipsCmd = &cobra.Command{
 	},
 }
 
+// checkIP rejects arguments that aren't IP addresses (e.g. a mistyped subcommand
+// like `vtscan ip scan 1.2.3.4`) before they're sent to VirusTotal as a lookup.
+func checkIP(arg string) error {
+	if net.ParseIP(arg) == nil {
+		return fmt.Errorf("vtscan: %q is not a valid IP address\n  → look up an IP:  vtscan ip <ip address>\n  → rescan an IP:   vtscan ip rescan <ip address>", arg)
+	}
+	return nil
+}
+
+func ipNotFoundMsg(ip string) string {
+	return fmt.Sprintf("vtscan: VirusTotal has no report for %s yet\n  → ask VirusTotal to analyse it:  vtscan ip rescan %s\n", ip, ip)
+}
+
+func rescanQueuedMsg(ip, id string) string {
+	return fmt.Sprintf("vtscan: ✓ rescan queued for %s (analysis ID: %s)\n  → results usually take a few minutes; check back with:  vtscan ip %s\n", ip, id, ip)
+}
+
+// rescanIP queues a VirusTotal re-analysis of ip and returns the analysis ID.
+func rescanIP(c *client.Client, ip string) (string, error) {
+	body, statusCode, err := c.Post(fmt.Sprintf("ip_addresses/%s/analyse", url.PathEscape(ip)))
+	if err != nil {
+		return "", err
+	}
+	if statusCode != 200 {
+		return "", fmt.Errorf("vtscan: rescan failed for %s (HTTP %d)", ip, statusCode)
+	}
+
+	var resp struct {
+		Data struct {
+			ID string `json:"id"`
+		} `json:"data"`
+	}
+	if err := json.Unmarshal(body, &resp); err != nil {
+		return "", fmt.Errorf("vtscan: error unmarshalling rescan response for %s: %w", ip, err)
+	}
+	return resp.Data.ID, nil
+}
+
+var ipRescanCmd = &cobra.Command{
+	Use:     "rescan <ip>",
+	Aliases: []string{"reanalyse", "reanalyze"},
+	Short:   "Request a re-analysis of an IP address",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			return fmt.Errorf("vtscan: missing IP address argument\n\nUsage:\n  vtscan ip rescan <ip address>")
+		}
+
+		apiKey := GetAPIKey()
+		if apiKey == "" {
+			return fmt.Errorf("vtscan: missing VT_API_KEY in environmental variables. Please see the README.md @ github.com/ibnaleem/vtscan to configure your API key")
+		}
+
+		c := client.NewClient(apiKey)
+
+		for _, ip := range args {
+			if err := checkIP(ip); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				continue
+			}
+			id, err := rescanIP(c, ip)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				continue
+			}
+			fmt.Print(rescanQueuedMsg(ip, id))
+		}
+
+		return nil
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(ipCmd)
 	ipCmd.AddCommand(ipCommentsCmd)
 	ipCmd.AddCommand(ipVotesCmd)
 	ipCmd.AddCommand(ipRelationshipsCmd)
+	ipCmd.AddCommand(ipRescanCmd)
 }
