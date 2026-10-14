@@ -40,6 +40,7 @@ The hash specified in the argument does not have to be SHA256: it could be eithe
 ```bash
 $ vtscan ip <ip address 1> <ip address 2> <ip address 3>...
 ```
+If VirusTotal has no report for an IP yet, `vtscan` suggests queueing one with `vtscan ip rescan <ip address>`.
 
 ## 🔍 Searching Comments on an IP Address
 ```bash
@@ -56,6 +57,12 @@ $ vtscan ip votes <ip address 1>
 $ vtscan ip relationships <ip address> <relationship>
 ```
 Where `<relationship>` is one of: `communicating_files`, `downloaded_files`, `graphs`, `historical_ssl_certificates`, `historical_whois`, `referrer_files`, `related_comments`, `related_references`, `related_threat_actors`, `resolutions`, `urls`.
+
+## 🔄 Rescanning IP Addresses
+```bash
+$ vtscan ip rescan <ip address 1> <ip address 2> <ip address 3>...
+```
+Asks VirusTotal to re-analyse each IP and prints the analysis ID it queued. Analysis usually takes a few minutes; then look the IP up again with `vtscan ip <ip address>`.
 
 ## 🔍 Searching Domains
 ```bash
@@ -82,10 +89,9 @@ Where `<relationship>` is one of: `caa_records`, `cname_records`, `comments`, `c
 ## 🗺️ Roadmap
 These are the following API endpoints that are planned for implementation
 ### IP Addresses
-1. [Request an IP address (re)scan](https://docs.virustotal.com/reference/rescan-ip) `POST`
-2. [Add a comment to an IP address](https://docs.virustotal.com/reference/ip-comments-post) `POST`
-3. [Get object descriptors related to an IP address](docs.virustotal.com/reference/ip-relationships-ids) `GET`
-4. [Add a vote to an IP address](https://docs.virustotal.com/reference/ip-votes-post) `POST`
+1. [Add a comment to an IP address](https://docs.virustotal.com/reference/ip-comments-post) `POST`
+2. [Get object descriptors related to an IP address](docs.virustotal.com/reference/ip-relationships-ids) `GET`
+3. [Add a vote to an IP address](https://docs.virustotal.com/reference/ip-votes-post) `POST`
 
 ### Domains & Resolutions
 1. [Request an domain (re)scan](https://docs.virustotal.com/reference/domains-rescan) `POST`
