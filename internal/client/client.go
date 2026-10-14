@@ -22,18 +22,26 @@ func NewClient(apikey string) *Client {
 }
 
 func (c *Client) Get(endpoint string) ([]byte, int, error) {
+	return c.do(http.MethodGet, endpoint)
+}
+
+func (c *Client) Post(endpoint string) ([]byte, int, error) {
+	return c.do(http.MethodPost, endpoint)
+}
+
+func (c *Client) do(method, endpoint string) ([]byte, int, error) {
 
 	client := &http.Client{
 		Timeout: 60 * time.Second,
 	}
 
-	url := fmt.Sprintf("%s/%s", c.BaseURL, endpoint) 
+	url := fmt.Sprintf("%s/%s", c.BaseURL, endpoint)
 
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	
+	req, err := http.NewRequest(method, url, nil)
+
 	if err != nil {
 		return nil, 400, err
-	}	
+	}
 
 	req.Header.Set("User-Agent", DefaultUserAgent)
 	req.Header.Set("accept", "application/json")
@@ -41,8 +49,8 @@ func (c *Client) Get(endpoint string) ([]byte, int, error) {
 	res, err := client.Do(req)
 
 	if err != nil {
-		return nil, res.StatusCode, err
-	}	
+		return nil, 0, err
+	}
 
 	defer res.Body.Close()
 
