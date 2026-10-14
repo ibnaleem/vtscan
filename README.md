@@ -68,6 +68,7 @@ Asks VirusTotal to re-analyse each IP and prints the analysis ID it queued. Anal
 ```bash
 $ vtscan domain <domain 1> <domain 2> <domain 3>...
 ```
+If VirusTotal has no report for a domain yet, `vtscan` suggests queueing one with `vtscan domain rescan <domain>`.
 
 ## 🔍 Searching Comments on a Domain
 ```bash
@@ -86,6 +87,12 @@ $ vtscan domain relationships <domain> <relationship>
 ```
 Where `<relationship>` is one of: `caa_records`, `cname_records`, `comments`, `communicating_files`, `downloaded_files`, `graphs`, `historical_ssl_certificates`, `historical_whois`, `immediate_parent`, `mx_records`, `ns_records`, `parent`, `referrer_files`, `related_comments`, `related_references`, `related_threat_actors`, `resolutions`, `soa_records`, `siblings`, `subdomains`, `urls`, `user_votes`.
 
+## 🔄 Rescanning Domains
+```bash
+$ vtscan domain rescan <domain 1> <domain 2> <domain 3>...
+```
+Asks VirusTotal to re-analyse each domain and prints the analysis ID it queued. Analysis usually takes a few minutes; then look the domain up again with `vtscan domain <domain>`.
+
 ## 🗺️ Roadmap
 These are the following API endpoints that are planned for implementation
 ### IP Addresses
@@ -94,8 +101,7 @@ These are the following API endpoints that are planned for implementation
 3. [Add a vote to an IP address](https://docs.virustotal.com/reference/ip-votes-post) `POST`
 
 ### Domains & Resolutions
-1. [Request an domain (re)scan](https://docs.virustotal.com/reference/domains-rescan) `POST`
-2. [Add a comment to a domain](https://docs.virustotal.com/reference/domains-comments-post) `POST`
-3. [Get object descriptors related to a domain](https://docs.virustotal.com/reference/domains-relationships-ids) `GET`
-4. [Get a DNS resolution object](https://docs.virustotal.com/reference/get-resolution-by-id) `GET`
-5. [Add a vote to a domain](https://docs.virustotal.com/reference/domain-votes-post) `POST`
+1. [Add a comment to a domain](https://docs.virustotal.com/reference/domains-comments-post) `POST`
+2. [Get object descriptors related to a domain](https://docs.virustotal.com/reference/domains-relationships-ids) `GET`
+3. [Get a DNS resolution object](https://docs.virustotal.com/reference/get-resolution-by-id) `GET`
+4. [Add a vote to a domain](https://docs.virustotal.com/reference/domain-votes-post) `POST`
