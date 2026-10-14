@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/ibnaleem/vtscan/internal/client"
 	"github.com/ibnaleem/vtscan/internal/printer"
@@ -30,13 +31,17 @@ var domainCmd = &cobra.Command{
 		c := client.NewClient(apiKey)
 
 		for _, domain := range args {
+			if err := checkDomain(domain); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				continue
+			}
 			body, statusCode, err := c.Get(fmt.Sprintf("domains/%s", domain))
 			if err != nil {
 				return err
 			}
 			if statusCode != 200 {
-				fmt.Printf("vtscan: nothing found for %s\n", domain)
-				return nil
+				fmt.Print(notFoundMsg("domain", domain))
+				continue
 			}
 
 			var domainResponse types.DomainResponse
@@ -263,9 +268,52 @@ var domainRelationshipsCmd = &cobra.Command{
 	},
 }
 
+// checkDomain rejects arguments that aren't bare domains (e.g. a mistyped
+// subcommand like `vtscan domain scan example.com`, or a full URL).
+func checkDomain(arg string) error {
+	if !strings.Contains(arg, ".") || strings.ContainsAny(arg, "/:@ ") {
+		return fmt.Errorf("vtscan: %q is not a valid domain\n  → look up a domain:  vtscan domain <domain>\n  → rescan a domain:   vtscan domain rescan <domain>", arg)
+	}
+	return nil
+}
+
+var domainRescanCmd = &cobra.Command{
+	Use:     "rescan <domain>",
+	Aliases: []string{"reanalyse", "reanalyze"},
+	Short:   "Request a re-analysis of a domain",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			return fmt.Errorf("vtscan: missing domain argument\n\nUsage:\n  vtscan domain rescan <domain>")
+		}
+
+		apiKey := GetAPIKey()
+		if apiKey == "" {
+			return fmt.Errorf("vtscan: missing VT_API_KEY in environmental variables. Please see the README.md @ github.com/ibnaleem/vtscan to configure your API key")
+		}
+
+		c := client.NewClient(apiKey)
+
+		for _, domain := range args {
+			if err := checkDomain(domain); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				continue
+			}
+			id, err := rescan(c, "domains", domain)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				continue
+			}
+			fmt.Print(rescanQueuedMsg("domain", domain, id))
+		}
+
+		return nil
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(domainCmd)
 	domainCmd.AddCommand(domainCommentsCmd)
 	domainCmd.AddCommand(domainVotesCmd)
 	domainCmd.AddCommand(domainRelationshipsCmd)
+	domainCmd.AddCommand(domainRescanCmd)
 }
