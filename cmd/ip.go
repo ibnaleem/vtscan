@@ -40,7 +40,7 @@ var ipCmd = &cobra.Command{
 				return err
 			}
 			if statusCode != 200 {
-				fmt.Print(ipNotFoundMsg(ip))
+				fmt.Print(notFoundMsg("ip", ip))
 				continue
 			}
 
@@ -264,35 +264,6 @@ func checkIP(arg string) error {
 	return nil
 }
 
-func ipNotFoundMsg(ip string) string {
-	return fmt.Sprintf("vtscan: VirusTotal has no report for %s yet\n  → ask VirusTotal to analyse it:  vtscan ip rescan %s\n", ip, ip)
-}
-
-func rescanQueuedMsg(ip, id string) string {
-	return fmt.Sprintf("vtscan: ✓ rescan queued for %s (analysis ID: %s)\n  → results usually take a few minutes; check back with:  vtscan ip %s\n", ip, id, ip)
-}
-
-// rescanIP queues a VirusTotal re-analysis of ip and returns the analysis ID.
-func rescanIP(c *client.Client, ip string) (string, error) {
-	body, statusCode, err := c.Post(fmt.Sprintf("ip_addresses/%s/analyse", url.PathEscape(ip)))
-	if err != nil {
-		return "", err
-	}
-	if statusCode != 200 {
-		return "", fmt.Errorf("vtscan: rescan failed for %s (HTTP %d)", ip, statusCode)
-	}
-
-	var resp struct {
-		Data struct {
-			ID string `json:"id"`
-		} `json:"data"`
-	}
-	if err := json.Unmarshal(body, &resp); err != nil {
-		return "", fmt.Errorf("vtscan: error unmarshalling rescan response for %s: %w", ip, err)
-	}
-	return resp.Data.ID, nil
-}
-
 var ipRescanCmd = &cobra.Command{
 	Use:     "rescan <ip>",
 	Aliases: []string{"reanalyse", "reanalyze"},
@@ -314,12 +285,12 @@ var ipRescanCmd = &cobra.Command{
 				fmt.Fprintln(os.Stderr, err)
 				continue
 			}
-			id, err := rescanIP(c, ip)
+			id, err := rescan(c, "ip_addresses", ip)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 				continue
 			}
-			fmt.Print(rescanQueuedMsg(ip, id))
+			fmt.Print(rescanQueuedMsg("ip", ip, id))
 		}
 
 		return nil
